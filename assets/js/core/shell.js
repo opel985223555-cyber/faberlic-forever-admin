@@ -18,6 +18,6 @@
    if(A.modules[section]?.render)A.modules[section].render();
  };
  A.modules={};
- A.refreshAll=async()=>{await A.repo.refresh();A.modules.overview?.render();A.modules.videos?.render();};
+ A.refreshAll=async()=>{await A.repo.refresh();A.modules.overview?.render();A.modules.videos?.render();A.modules.categories?.render();A.modules.ranks?.render();};
  A.$on=(el,type,handler)=>el?.addEventListener(type,handler);
 })();

@@ -8,3 +8,7 @@
 .youtube-cover-preview strong{font-size:12px;color:#e9efe8}
 .youtube-cover-preview small{font-size:11px;line-height:1.5;color:#aab5a8}
 @media(max-width:580px){.youtube-cover-preview img{width:104px;height:68px;flex-basis:104px}}
+
+/* CMS-07-YT: library ordering; thumbnails come directly from YouTube. */
+.lesson-thumb{object-fit:cover}.lesson-row[draggable="true"]{cursor:grab}.lesson-row.dragover{outline:2px solid var(--lime)}
+@media(max-width:740px){.filters{flex-wrap:wrap}.filters select{min-width:130px}.lesson-row{flex-wrap:wrap}.lesson-actions{width:100%;flex-direction:row;flex-wrap:wrap}.lesson-info{min-width:170px}}

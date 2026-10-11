@@ -1,4 +1,2 @@
-/* Training statuses module: read-only approved taxonomy. */
-(()=>{const A=window.FFAdmin;
-A.modules.ranks={render(){A.$('#ranks-list').innerHTML=A.topics.ranks.map(([id,label])=>`<div class="catalog-item"><div class="number-icon accent">${id}%</div><div><strong>${A.escape(label)}</strong><small>Отдельная папка видеоуроков</small></div></div>`).join('');}};
-})();
+/* Approved ranks are editable as nested categories in the Categories CMS. */
+(()=>{const A=window.FFAdmin;A.modules.ranks={render(){const host=A.$('#ranks-list');if(!host)return;const rows=A.catalog.children('ranks');host.innerHTML=rows.map((v,i)=>`<div class="catalog-item"><div class="number-icon accent">${A.escape(v.legacyTopicId||'▦')}</div><div><strong>${A.escape(A.catalog.label(v.id))}</strong><small>${v.status==='soon'?'Скоро':v.status==='hidden'?'Скрыт':'Открыт'} · Редактирование в «Категории»</small></div></div>`).join('')||'<div class="empty-state">Разделы ещё не добавлены.</div>';}};})();

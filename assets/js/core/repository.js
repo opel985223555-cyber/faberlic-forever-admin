@@ -6,6 +6,8 @@
    async list(){requireAuth();return A.firebase.listLessons();},
    async save(payload,id){requireAuth();return A.firebase.upsertLesson(payload,id);},
    async remove(id){requireAuth();return A.firebase.deleteLesson(id);},
-   async refresh(){A.state.lessons=await A.repo.list();}
+   async reorder(ids){requireAuth();return A.firebase.reorderLessons(ids);},
+   async saveCatalog(items){requireAuth();return A.firebase.putCatalog(items);},
+   async refresh(){A.state.lessons=await A.repo.list();A.state.catalog=await A.firebase.listCatalog();}
  };
 })();

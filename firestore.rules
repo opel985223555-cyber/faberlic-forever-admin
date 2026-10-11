@@ -25,6 +25,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /taxonomy/{docId} {
+      allow get: if docId == 'catalog';
+      allow list: if false;
+      allow create, update: if docId == 'catalog' && isAdmin();
+      allow delete: if false;
+    }
+
     // No other collections are accessible yet.
     match /{document=**} { allow read, write: if false; }
   }

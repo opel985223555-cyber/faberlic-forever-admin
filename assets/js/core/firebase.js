@@ -32,6 +32,10 @@
    async listLessons(){const snap=await sdk.db.getDocs(sdk.db.collection(db,'lessons'));return snap.docs.map(x=>({id:x.id,...x.data()}));},
    async upsertLesson(data,id){if(id){await sdk.db.updateDoc(sdk.db.doc(db,'lessons',id),{...data,updatedAt:sdk.db.serverTimestamp()});return id;}
      const ref=await sdk.db.addDoc(sdk.db.collection(db,'lessons'),{...data,createdAt:sdk.db.serverTimestamp(),updatedAt:sdk.db.serverTimestamp()});return ref.id;},
-   async deleteLesson(id){await sdk.db.deleteDoc(sdk.db.doc(db,'lessons',id));}
+   async deleteLesson(id){await sdk.db.deleteDoc(sdk.db.doc(db,'lessons',id));},
+   async reorderLessons(ids){const batch=sdk.db.writeBatch(db);ids.forEach((id,i)=>batch.update(sdk.db.doc(db,'lessons',id),{order:i+1,updatedAt:sdk.db.serverTimestamp()}));await batch.commit();},
+   async listCatalog(){try{const snap=await sdk.db.getDoc(sdk.db.doc(db,'taxonomy','catalog'));return snap.exists()?snap.data().items||null:null;}catch(error){if(error.code==='permission-denied')return null;throw error;}},
+   async putCatalog(items){await sdk.db.setDoc(sdk.db.doc(db,'taxonomy','catalog'),{items,updatedAt:sdk.db.serverTimestamp(),version:1});}
+
  };
 })();

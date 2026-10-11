@@ -2,7 +2,7 @@
 (()=>{
  const A=window.FFAdmin;
  const boot=async()=>{
-  A.modules.videos.init();
+  A.modules.videos.init();A.modules.categories.init();
   A.$$('.nav-button').forEach(btn=>A.$on(btn,'click',()=>A.navigate(btn.dataset.page)));
   A.$on(A.$('#open-sidebar'),'click',()=>A.$('#sidebar').classList.toggle('open'));
   A.$on(A.$('#log-out'),'click',async()=>{try{await A.firebase.signOut();}finally{await A.setMode('');}});
