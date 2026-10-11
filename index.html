@@ -43,7 +43,11 @@
    <section data-module="videos" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">БИБЛИОТЕКА ОБУЧЕНИЯ</span><h1>Видеоуроки</h1><p class="section-desc">Добавляй ссылки YouTube, выбирай категорию, уровень и язык.</p></div></div>
     <div class="panel form-panel" id="form-card"><div class="panel-heading"><h2 id="form-heading">Новый видеоурок</h2><span class="tagline">Только ссылка · YouTube</span></div>
      <form id="lesson-form" autocomplete="off"><div class="form-grid"><label class="field wide">Название урока <input id="lesson-title" name="title" type="text" maxlength="160" placeholder="Например: Первые шаги в Faberlic" required></label>
-       <label class="field wide">Ссылка на YouTube <input id="lesson-url" name="url" type="url" placeholder="https://youtu.be/XXXXXXXXXXX" required><small id="youtube-hint">Поддерживается YouTube, Shorts и youtu.be</small></label>
+       <label class="field wide">Ссылка на YouTube <input id="lesson-url" name="url" type="url" placeholder="https://youtu.be/XXXXXXXXXXX" required><small id="youtube-hint">Поддерживается YouTube, Shorts и youtu.be</small>
+       <div id="youtube-cover-preview" class="youtube-cover-preview" hidden aria-live="polite">
+        <img id="youtube-cover-preview-img" alt="Автоматическая обложка YouTube" loading="lazy">
+        <div><strong>Автоматическая обложка YouTube</strong><small>Эта заставка появится в «Новинках», категориях, избранном и на баннере. Ничего загружать не нужно.</small></div>
+       </div></label>
        <label class="field">Категория <select id="lesson-category" required></select></label>
        <label class="field" id="topic-row" hidden>Подраздел / статус <select id="lesson-topic"></select></label>
        <label class="field">Язык видео <select id="lesson-lang"><option value="ru">RU · Русский</option><option value="tj">TJ · Таджикский</option><option value="uz">UZ · Узбекский</option></select></label>

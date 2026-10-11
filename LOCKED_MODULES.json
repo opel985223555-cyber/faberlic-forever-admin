@@ -1,6 +1,6 @@
 {
-  "version": "0.4-firebase-web-config",
-  "policy": "Working-site version: only Firebase email/password sign-in; no demo access. UI/branding preserved from v0.2. Changes require explicit approval per module. Firebase web configuration was added as the only approved changed module, verified against the v0.3 baseline.",
+  "version": "0.5-automatic-youtube-cover-preview",
+  "policy": "Working-site version: only Firebase email/password sign-in; no demo access. UI/branding preserved from v0.2. Changes require explicit approval per module. Firebase web configuration was added as the only approved changed module, verified against the v0.3 baseline. | SYNC-06: only videos module, its CSS, and its form markup changed to preview existing YouTube thumbnail. No auth, rules, Firebase schema, or upload modifications.",
   "sha256": {
     "index.html": "10922a04b527e234b374caa45192bc7c52b4672b524185559ede2ffee7a7edd6",
     "assets/css/base.css": "5b2d74e4224bc2cf6e177dd3684790475c9626da5549df538d7f1a81a53eb0fb",
