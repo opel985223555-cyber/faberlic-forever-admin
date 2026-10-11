@@ -1,0 +1,30 @@
+{
+  "version": "0.4-firebase-web-config",
+  "policy": "Working-site version: only Firebase email/password sign-in; no demo access. UI/branding preserved from v0.2. Changes require explicit approval per module. Firebase web configuration was added as the only approved changed module, verified against the v0.3 baseline.",
+  "sha256": {
+    "index.html": "10922a04b527e234b374caa45192bc7c52b4672b524185559ede2ffee7a7edd6",
+    "assets/css/base.css": "5b2d74e4224bc2cf6e177dd3684790475c9626da5549df538d7f1a81a53eb0fb",
+    "assets/css/categories.css": "966552fc054bbf00634ed710ace3917925f1eb25cb83619ca4639a859d9c24c0",
+    "assets/css/live.css": "2bcd74296b5377caa2ecd6d2fee598ee3ee80d3a39ab54247c418425d9fbc673",
+    "assets/css/overview.css": "47fcd7e1004cdc8c859a90bcf0c4f893af279dce08d41471af380fa8e723c930",
+    "assets/css/settings.css": "fd0138bee80dbc2b1c3ee2d99893c65b1b5a51acc0ae418685847c51acff3f1b",
+    "assets/css/videos.css": "571276922ffd690a2c29f82ecf053fb970de70bb48996ab7ef7147140fb1209c",
+    "assets/js/core/firebase.js": "984fd1adaff028a912c989b5ac66fe412c2ef6c3697d7ca898cd96b51ea8e0d8",
+    "assets/js/core/repository.js": "57127c452f11025cbd4025bf84bf18064984d324193144fb39301f10097d822e",
+    "assets/js/core/shell.js": "6292d8c495b7f6061122616128b5635af6c2e189724bfd3f160e8a72a542c3ca",
+    "assets/js/core/state.js": "1a93b70d91f84a93142fe586183d7df01504ba82d55482173103487faa3bd275",
+    "assets/js/main.js": "785abd5d4462bf34906a0be51b0745ead7090417661262a81bd78721df4a1243",
+    "assets/js/modules/categories.js": "8cb4c7fd59f1f153267a02edb643b889dff4a2ca9175706c47d86118917a94fa",
+    "assets/js/modules/live.js": "fb8cc592d76faf058442da96642639bccd6846dbcdf354efe80fa70179bd71db",
+    "assets/js/modules/materials.js": "979414f5c7bf3ccda3df6e44811f38be3b5d8701f5adef616502471101fef50e",
+    "assets/js/modules/overview.js": "878affe1a10cca8a55312c35b10c6d7aa57a032571f9990b474146ecbf56edd5",
+    "assets/js/modules/ranks.js": "973953777fe9f5cd64492553a304e194cd2eea4babbf3d07e0bb85aeb1ae9c8c",
+    "assets/js/modules/settings.js": "f94a936ba8688b7d38b24b1a754802e1fec255917c8bfa572f110fcb50f5d22c",
+    "assets/js/modules/videos.js": "f8527744922521b18e1a24fb577e96d6d2defc40ff9a6cbc8af23da30fdef993",
+    "config/firebase-config.js": "20fd36e46514cec2a4b837b1627aeb6499858cf88f77e5158026dff01fa74595",
+    "firestore.rules": "7879e22a5d53b4d689ef8321de674219ec2fa3be2a105a90ddc77545359305c6",
+    "assets/css/branding.css": "47a24d44ba4f1bbe9b88d797a8814df912dc9c1956317af6aeecdd06a254140d",
+    "assets/images/forever-logo.png": "e44fc29ce800bcf1eb41279e6441f37c996fc8233b44a7596c059d02b3f520c9",
+    "assets/images/forever-favicon.png": "890b5c66ecf4c87a7876f2fb8a7afc1c3888a53986dd918fee342e8aa565487a"
+  }
+}

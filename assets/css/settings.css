@@ -1,0 +1,1 @@
+.settings-panel{padding:8px 25px}.settings-panel>div{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:21px 0;border-bottom:1px solid var(--border);font-size:13px}.settings-panel>div:last-child{border:0}.settings-panel span{color:var(--muted)}.settings-panel strong{font-size:12px;text-align:right}
