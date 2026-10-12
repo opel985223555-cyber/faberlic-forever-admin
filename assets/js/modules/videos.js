@@ -2,7 +2,6 @@
 (()=>{
  const A=window.FFAdmin;
  const $=A.$;
- const selectOptions=(values,selected)=>values.map(([v,l])=>`<option value="${A.escape(v)}" ${selected===v?'selected':''}>${A.escape(l)}</option>`).join('');
  const getVideo=id=>A.state.lessons.find(v=>v.id===id);
  const leaf=v=>v.leafCategoryId||((v.topicId&&['social','ranks'].includes(v.categoryId))?v.categoryId+'__'+v.topicId:v.categoryId)||'newbie';
  const scope=v=>leaf(v)+'|'+(v.language||'ru');
@@ -11,13 +10,15 @@
  function updateCoverPreview(){const id=A.youtubeId($('#lesson-url').value);const preview=$('#youtube-cover-preview'),img=$('#youtube-cover-preview-img');preview.hidden=!id;if(id)img.src='https://i.ytimg.com/vi/'+id+'/hqdefault.jpg';else img.removeAttribute('src');}
  function refreshCategoryOptions(){const s=$('#lesson-category'),chosen=s?.value||'newbie';if(!s)return;s.innerHTML=A.catalog.selectHTML(chosen);if([...s.options].some(o=>o.value===chosen))s.value=chosen;
   const f=$('#filter-category'),v=f?.value||'all';if(f){f.innerHTML='<option value="all">Все разделы</option>'+A.catalog.selectHTML(v);f.value=[...f.options].some(o=>o.value===v)?v:'all';}
-  const current=A.catalog.node(s.value);$('#topic-row').hidden=true;
+  $('#topic-row').hidden=true;
  }
  function clearForm(){A.state.editingId=null;$('#lesson-form').reset();refreshCategoryOptions();$('#form-heading').textContent='Новый видеоурок';$('#save-lesson').textContent='Сохранить урок';$('#cancel-edit').hidden=true;$('#lesson-status').value='published';$('#lesson-orientation').value='vertical';$('#lesson-lang').value='ru';updateCoverPreview();}
  function edit(id){const v=getVideo(id);if(!v)return;A.navigate('videos');A.state.editingId=v.id;$('#lesson-title').value=v.title||'';$('#lesson-url').value=v.youtubeUrl||A.youtubeLink(v.youtubeId||'');refreshCategoryOptions();$('#lesson-category').value=leaf(v);$('#lesson-description').value=v.description||'';$('#lesson-lang').value=v.language||'ru';$('#lesson-orientation').value=v.orientation||'vertical';$('#lesson-status').value=v.status||'draft';updateCoverPreview();$('#form-heading').textContent='Редактирование урока';$('#save-lesson').textContent='Сохранить изменения';$('#cancel-edit').hidden=false;$('#form-card').scrollIntoView({behavior:'smooth',block:'start'});}
  function categoryPath(id){const x=A.catalog.node(id);if(!x)return {root:id,first:null};let first=null,cur=x,root=x,steps=0;while(cur?.parentId&&steps++<20){first=cur;root=A.catalog.node(cur.parentId);if(!root)break;cur=root;}return {root:root?.id||id,first:first?.id||null};}
  async function save(e){e.preventDefault();if(A.state.busy)return;const title=$('#lesson-title').value.trim(),youtubeId=A.youtubeId($('#lesson-url').value),selected=$('#lesson-category').value,language=$('#lesson-lang').value;const id=A.state.editingId,old=id?getVideo(id):null;
   if(!title){A.notify('Введите название урока','error');return;}if(!youtubeId){A.notify('Укажите корректную ссылку YouTube','error');return;}
+  if(!selected||!A.catalog.node(selected)){A.notify('Выбери существующую категорию. Возможно, раздел был изменён другим администратором.','error');return;}
+  if(id&&!old){A.notify('Урок не найден. Обнови страницу.','error');return;}
   const path=categoryPath(selected),groupId=['social','ranks'].includes(path.root)?path.root:null;
   let topicId=null;if(groupId){const first=A.catalog.node(path.first);topicId=first?.legacyTopicId||first?.id?.replace(groupId+'__','')||null;}
   const targetScope=selected+'|'+language,oldScope=old?scope(old):null;
@@ -30,7 +31,7 @@
   finally{A.state.busy=false;$('#save-lesson').disabled=false;}
  }
  async function remove(id){const v=getVideo(id);if(!v||!confirm(`Удалить урок «${v.title}»?`))return;try{await A.repo.remove(id);await A.refreshAll();if(A.state.editingId===id)clearForm();A.notify('Урок удалён');}catch(e){A.notify('Ошибка удаления: '+e.message,'error')}}
- async function reorder(ids){try{await A.repo.reorder(ids);await A.refreshAll();A.notify('Новый порядок сохранён');}catch(err){A.notify('Порядок не сохранён: '+err.message,'error')}}
+ async function reorder(ids){if(A.state.busy)return;A.state.busy=true;try{await A.repo.reorder(ids);await A.refreshAll();A.notify('Новый порядок сохранён');}catch(err){A.notify('Порядок не сохранён: '+err.message,'error')}finally{A.state.busy=false;}}
  async function move(id,delta){const v=getVideo(id);if(!v)return;const siblings=A.state.lessons.filter(x=>scope(x)===scope(v)).sort(compare),pos=siblings.findIndex(x=>x.id===id),to=pos+delta;if(to<0||to>=siblings.length)return;const ids=siblings.map(x=>x.id);[ids[pos],ids[to]]=[ids[to],ids[pos]];await reorder(ids)}
  function card(v){const id=A.escape(v.id),cover=`https://i.ytimg.com/vi/${encodeURIComponent(v.youtubeId)}/hqdefault.jpg`,subtitle=A.catalog.breadcrumb(leaf(v));return `<article class="lesson-row" draggable="true" data-lesson="${id}">
   <img class="lesson-thumb" src="${A.escape(cover)}" alt="Обложка" loading="lazy" onerror="this.style.visibility='hidden'">
