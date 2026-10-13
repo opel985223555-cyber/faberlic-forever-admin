@@ -1,13 +1,23 @@
-/* Production repository — all lesson operations require Firebase session. */
+/* Mutations require a complete validated server snapshot for this user. */
 (()=>{
  const A=window.FFAdmin;
+ A.state.dataReady=false;
  const requireAuth=()=>{if(A.state.mode!=='firebase'||!A.state.currentUser)throw Error('Требуется авторизация администратора');};
+ const baseline=()=>{requireAuth();if(!A.state.dataReady||A.state.snapshotUid!==A.state.currentUser.uid)throw Error('Данные ещё не загружены или проверка завершилась ошибкой. Обновите страницу.');return {lessons:A.state.lessons,catalog:A.state.catalog,catalogRevision:A.state.catalogRevision,orderRevisions:A.state.orderRevisions};};
  A.repo={
-   async list(){requireAuth();return A.firebase.listLessons();},
-   async save(payload,id){requireAuth();return A.firebase.upsertLesson(payload,id);},
-   async remove(id){requireAuth();return A.firebase.deleteLesson(id);},
-   async reorder(ids){requireAuth();return A.firebase.reorderLessons(ids);},
-   async saveCatalog(items){requireAuth();return A.firebase.putCatalog(items);},
-   async refresh(){A.state.lessons=await A.repo.list();A.state.catalog=await A.firebase.listCatalog();}
+  async list(){requireAuth();return A.firebase.listLessons();},
+  async save(payload,id,expectedRevision){const b=baseline();if(id&&expectedRevision!==undefined){const old=b.lessons.find(v=>v.id===id);if(!old||A.dataGuard.revision(old.revision)!==expectedRevision)throw Error('Урок изменился. Обновите страницу.');}return A.firebase.upsertLesson(payload,id,b);},
+  async remove(id){return A.firebase.deleteLesson(id,baseline());},
+  async reorder(ids){return A.firebase.reorderLessons(ids,baseline());},
+  async saveCatalog(items,expectedRevision){const b=baseline();if(expectedRevision!==undefined&&expectedRevision!==b.catalogRevision)throw Error('Каталог изменился. Обновите страницу.');return A.firebase.putCatalog(items,b);},
+  async refresh(){
+   requireAuth();const uid=A.state.currentUser.uid;A.state.dataReady=false;
+   const next=await A.firebase.readSnapshot();
+   if(A.state.currentUser?.uid!==uid||A.state.mode!=='firebase')throw Error('Сессия изменилась во время загрузки');
+   if(next.catalog!==null)A.dataGuard.catalog(next.catalog);
+   for(const lesson of next.lessons)A.dataGuard.lesson(lesson);
+   A.dataGuard.revision(next.catalogRevision);
+   Object.assign(A.state,next,{snapshotUid:uid,dataReady:true});
+  }
  };
 })();

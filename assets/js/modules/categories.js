@@ -1,6 +1,7 @@
 /* CMS-08: editable content taxonomy. Existing IDs are immutable: lesson references remain intact. */
 (()=>{
  const A=window.FFAdmin;
+ let editingRevision;
  const seed=()=>Array.isArray(window.FF_CATALOG_DEFAULTS)
    ? structuredClone(window.FF_CATALOG_DEFAULTS)
    : A.categories.map(([id,title],i)=>({id,parentId:null,name:{ru:title},description:{ru:''},status:'active',order:i+1}));
@@ -18,11 +19,11 @@
  // Hidden and 'soon' sections must remain selectable by the administrator, especially when editing an existing lesson.
  function listOptions(){const ordered=[],visited=new Set();function visit(parent,depth=0){if(depth>20)return;for(const x of children(parent)){if(visited.has(x.id))continue;visited.add(x.id);const suffix=x.status==='hidden'?' [Скрыт]':x.status==='soon'?' [Скоро]':'';ordered.push([x.id,breadcrumb(x.id)+suffix]);visit(x.id,depth+1);}}visit(null);return ordered;}
  const selectHTML=(selected='newbie')=>listOptions().map(([id,l])=>`<option value="${A.escape(id)}" ${selected===id?'selected':''}>${A.escape(l)}</option>`).join('');
- function edit(id){const x=node(id);if(!x)return;A.$('#category-edit-id').value=x.id;A.$('#category-parent').value=x.parentId||'';
+ function edit(id){const x=node(id);if(!x)return;editingRevision=A.state.catalogRevision;A.$('#category-edit-id').value=x.id;A.$('#category-parent').value=x.parentId||'';
    for(const lang of ['ru','tj','uz']){A.$('#category-name-'+lang).value=x.name?.[lang]||'';A.$('#category-desc-'+lang).value=x.description?.[lang]||'';}
    A.$('#category-status').value=x.status||'active';A.$('#category-form-title').textContent='Редактировать раздел';A.$('#category-save').textContent='Сохранить изменения';A.$('#category-form').scrollIntoView({behavior:'smooth',block:'start'});
  }
- function clear(){A.$('#category-form').reset();A.$('#category-edit-id').value='';A.$('#category-form-title').textContent='Добавить раздел';A.$('#category-save').textContent='Добавить раздел';}
+ function clear(){editingRevision=undefined;A.$('#category-form').reset();A.$('#category-edit-id').value='';A.$('#category-form-title').textContent='Добавить раздел';A.$('#category-save').textContent='Добавить раздел';}
  function render(){const holder=A.$('#categories-list');if(!holder)return;
    A.$('#category-parent').innerHTML='<option value="">Главная категория</option>'+listOptions().map(([id,n])=>`<option value="${A.escape(id)}">${A.escape(n)}</option>`).join('');
    A.$('#catalog-init-note').hidden=Boolean(A.state.catalog);
@@ -46,8 +47,9 @@
    const next={...existing,id:key,parentId:parent,name,description,status:A.$('#category-status').value,order:moved||!existing?Math.max(0,...fresh.filter(x=>(x.parentId||null)===parent&&x.id!==key).map(x=>Number(x.order)||0))+1:existing.order};
    const index=fresh.findIndex(x=>x.id===key);if(index>=0)fresh[index]=next;else fresh.push(next);
    normalize(fresh,parent);if(moved)normalize(fresh,existing.parentId);
+   try{A.dataGuard.catalog(fresh);}catch(err){A.notify(err.message,'error');return;}
    A.state.busy=true;A.$('#category-save').disabled=true;
-   try{await A.repo.saveCatalog(fresh);await A.refreshAll();clear();A.notify('Раздел сохранён');}catch(err){A.notify('Ошибка сохранения раздела: '+err.message,'error');}
+   try{await A.repo.saveCatalog(fresh,editingRevision);clear();try{await A.refreshAll();A.notify('Раздел сохранён');}catch(err){A.notify('Раздел сохранён, но список не обновлён. Обновите страницу: '+err.message,'error');}}catch(err){A.notify('Ошибка сохранения раздела: '+err.message,'error');}
    finally{A.state.busy=false;A.$('#category-save').disabled=false;}
  }
  async function shift(id,delta){if(A.state.busy)return;const x=node(id);if(!x)return;const siblings=children(x.parentId),index=siblings.findIndex(r=>r.id===id),other=siblings[index+delta];if(!other)return;

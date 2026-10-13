@@ -32,6 +32,7 @@ try:
    window.__ffDB={lessons:[initial],catalog:null};
    a.firebase.listLessons=async()=>structuredClone(window.__ffDB.lessons);
    a.firebase.listCatalog=async()=>window.__ffDB.catalog?structuredClone(window.__ffDB.catalog):null;
+   a.firebase.readSnapshot=async()=>({lessons:await a.firebase.listLessons(),catalog:await a.firebase.listCatalog(),catalogRevision:0,orderRevisions:{}});
    a.firebase.putCatalog=async(items)=>{window.__ffDB.catalog=structuredClone(items)};
    a.firebase.upsertLesson=async(data,id)=>{const db=window.__ffDB.lessons; if(id){const i=db.findIndex(v=>v.id===id);db[i]={...db[i],...structuredClone(data)};return id;}const key='lesson-'+(db.length+1);db.push({id:key,...structuredClone(data),createdAt:Date.now()});return key};
    a.firebase.reorderLessons=async(ids)=>{ids.forEach((id,i)=>{const v=window.__ffDB.lessons.find(v=>v.id===id);v.order=i+1;});};

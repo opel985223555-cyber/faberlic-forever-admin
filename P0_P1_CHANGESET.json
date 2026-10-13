@@ -1,0 +1,241 @@
+{
+  "sourceArchive": "Faberlic_Forever_Admin_CMS08_FULL.zip",
+  "sourceSha256": "688079e5ac499530ad65e4b17f20606dd74c094e4f2a7a3b427f6c607e68bcc3",
+  "changed": [
+    "assets/js/core/firebase.js",
+    "assets/js/core/repository.js",
+    "assets/js/modules/categories.js",
+    "assets/js/modules/videos.js",
+    "firestore.rules",
+    "index.html",
+    "tests/test_admin_browser.py"
+  ],
+  "added": [
+    "firebase.json",
+    "FIX_REPORT_P0_P1_RU.md",
+    "README_P0_P1_RU.md",
+    "tests/P0_P1_TEST_RESULTS.json",
+    "tests/test_firestore_rules.cjs",
+    "tests/test_p0_p1.cjs",
+    "tests/verify_change_scope.cjs",
+    "P0_P1_CHANGESET.json"
+  ],
+  "removed": [],
+  "files": [
+    {
+      "path": ".nojekyll",
+      "baselineSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finalSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "assets/css/base.css",
+      "baselineSha256": "5b2d74e4224bc2cf6e177dd3684790475c9626da5549df538d7f1a81a53eb0fb",
+      "finalSha256": "5b2d74e4224bc2cf6e177dd3684790475c9626da5549df538d7f1a81a53eb0fb"
+    },
+    {
+      "path": "assets/css/branding.css",
+      "baselineSha256": "47a24d44ba4f1bbe9b88d797a8814df912dc9c1956317af6aeecdd06a254140d",
+      "finalSha256": "47a24d44ba4f1bbe9b88d797a8814df912dc9c1956317af6aeecdd06a254140d"
+    },
+    {
+      "path": "assets/css/categories.css",
+      "baselineSha256": "966552fc054bbf00634ed710ace3917925f1eb25cb83619ca4639a859d9c24c0",
+      "finalSha256": "966552fc054bbf00634ed710ace3917925f1eb25cb83619ca4639a859d9c24c0"
+    },
+    {
+      "path": "assets/css/live.css",
+      "baselineSha256": "2bcd74296b5377caa2ecd6d2fee598ee3ee80d3a39ab54247c418425d9fbc673",
+      "finalSha256": "2bcd74296b5377caa2ecd6d2fee598ee3ee80d3a39ab54247c418425d9fbc673"
+    },
+    {
+      "path": "assets/css/overview.css",
+      "baselineSha256": "47fcd7e1004cdc8c859a90bcf0c4f893af279dce08d41471af380fa8e723c930",
+      "finalSha256": "47fcd7e1004cdc8c859a90bcf0c4f893af279dce08d41471af380fa8e723c930"
+    },
+    {
+      "path": "assets/css/settings.css",
+      "baselineSha256": "fd0138bee80dbc2b1c3ee2d99893c65b1b5a51acc0ae418685847c51acff3f1b",
+      "finalSha256": "fd0138bee80dbc2b1c3ee2d99893c65b1b5a51acc0ae418685847c51acff3f1b"
+    },
+    {
+      "path": "assets/css/videos.css",
+      "baselineSha256": "95794c0b32f8266552c64eccc5cf3a1e473c48d487f01c8b9ce47408ce18b909",
+      "finalSha256": "95794c0b32f8266552c64eccc5cf3a1e473c48d487f01c8b9ce47408ce18b909"
+    },
+    {
+      "path": "assets/images/forever-favicon.png",
+      "baselineSha256": "890b5c66ecf4c87a7876f2fb8a7afc1c3888a53986dd918fee342e8aa565487a",
+      "finalSha256": "890b5c66ecf4c87a7876f2fb8a7afc1c3888a53986dd918fee342e8aa565487a"
+    },
+    {
+      "path": "assets/images/forever-logo.png",
+      "baselineSha256": "e44fc29ce800bcf1eb41279e6441f37c996fc8233b44a7596c059d02b3f520c9",
+      "finalSha256": "e44fc29ce800bcf1eb41279e6441f37c996fc8233b44a7596c059d02b3f520c9"
+    },
+    {
+      "path": "assets/js/core/catalog-seed.js",
+      "baselineSha256": "a95fd2fa543a9d265aedbeaa7600c4624c9d261f10b6df9a18c226646493abd1",
+      "finalSha256": "a95fd2fa543a9d265aedbeaa7600c4624c9d261f10b6df9a18c226646493abd1"
+    },
+    {
+      "path": "assets/js/core/firebase.js",
+      "baselineSha256": "0b2f13dc2faacf251c2c816587f427580410f7fc9743ba4b3e19f10afdef34d3",
+      "finalSha256": "149ee605663055c617d2daf301d1bea96fea692f019a011d7dc6838ca6d91c81"
+    },
+    {
+      "path": "assets/js/core/repository.js",
+      "baselineSha256": "fc17ebfc8a110bc8077296cbb889356a93b025c3e4002b4d658d8b51e0ed3c27",
+      "finalSha256": "bc8c52da7712efd50250ddcbcb4116201913be7108aaf6185d54c6debfb9fecd"
+    },
+    {
+      "path": "assets/js/core/shell.js",
+      "baselineSha256": "5948110aa559bbb91855a87e9455d76b00b1cc2c4cb6fb51d95abc7785422790",
+      "finalSha256": "5948110aa559bbb91855a87e9455d76b00b1cc2c4cb6fb51d95abc7785422790"
+    },
+    {
+      "path": "assets/js/core/state.js",
+      "baselineSha256": "1a93b70d91f84a93142fe586183d7df01504ba82d55482173103487faa3bd275",
+      "finalSha256": "1a93b70d91f84a93142fe586183d7df01504ba82d55482173103487faa3bd275"
+    },
+    {
+      "path": "assets/js/main.js",
+      "baselineSha256": "17e0d6d05b7e27b84189f33260a5ae67044e56a18bae1cac5e97cefe085ed239",
+      "finalSha256": "17e0d6d05b7e27b84189f33260a5ae67044e56a18bae1cac5e97cefe085ed239"
+    },
+    {
+      "path": "assets/js/modules/categories.js",
+      "baselineSha256": "acea03e2a8139de78cfc3259698df446f26a01f216d2ea7743f83a8abc49bb24",
+      "finalSha256": "9485841a869d0a28f57a8d5cc38cc831c17da9c245a41d436c18c15b1b5a0815"
+    },
+    {
+      "path": "assets/js/modules/live.js",
+      "baselineSha256": "fb8cc592d76faf058442da96642639bccd6846dbcdf354efe80fa70179bd71db",
+      "finalSha256": "fb8cc592d76faf058442da96642639bccd6846dbcdf354efe80fa70179bd71db"
+    },
+    {
+      "path": "assets/js/modules/materials.js",
+      "baselineSha256": "979414f5c7bf3ccda3df6e44811f38be3b5d8701f5adef616502471101fef50e",
+      "finalSha256": "979414f5c7bf3ccda3df6e44811f38be3b5d8701f5adef616502471101fef50e"
+    },
+    {
+      "path": "assets/js/modules/overview.js",
+      "baselineSha256": "1642e826cdca3fb43091b0d07f1932de82df3bfb384582e96820641520834535",
+      "finalSha256": "1642e826cdca3fb43091b0d07f1932de82df3bfb384582e96820641520834535"
+    },
+    {
+      "path": "assets/js/modules/ranks.js",
+      "baselineSha256": "1fb8e73f3753b8395ae0b97329a5639b0752d70539d4b9d91744231ea2ad228d",
+      "finalSha256": "1fb8e73f3753b8395ae0b97329a5639b0752d70539d4b9d91744231ea2ad228d"
+    },
+    {
+      "path": "assets/js/modules/settings.js",
+      "baselineSha256": "f94a936ba8688b7d38b24b1a754802e1fec255917c8bfa572f110fcb50f5d22c",
+      "finalSha256": "f94a936ba8688b7d38b24b1a754802e1fec255917c8bfa572f110fcb50f5d22c"
+    },
+    {
+      "path": "assets/js/modules/videos.js",
+      "baselineSha256": "7d766db3837fb51c7749bbb3baeeac3a0a996ed060ecb4192ae87e2f84e9c95c",
+      "finalSha256": "5d8b59a01d5abf3f87da9b4644ad18eea4fb25b71401f5b8f73e2e0bdf8178f5"
+    },
+    {
+      "path": "config/firebase-config.js",
+      "baselineSha256": "20fd36e46514cec2a4b837b1627aeb6499858cf88f77e5158026dff01fa74595",
+      "finalSha256": "20fd36e46514cec2a4b837b1627aeb6499858cf88f77e5158026dff01fa74595"
+    },
+    {
+      "path": "firebase.json",
+      "baselineSha256": null,
+      "finalSha256": "cb8c571e6e71deaba15ecd79c1a863d4f177e84fbd55f1a5ae4d23cfe1647dbd"
+    },
+    {
+      "path": "firestore.rules",
+      "baselineSha256": "4242ae0266fe30e8cd2bcbaa113dec8ed9784a9b82fa9ebf3e64d04e8d06fd3e",
+      "finalSha256": "a46468a99842c4986e170bb975e200bc864d194a4bb16cb04d3f745f75d3e455"
+    },
+    {
+      "path": "FIX_REPORT_P0_P1_RU.md",
+      "baselineSha256": null,
+      "finalSha256": "be68915c3aa92fbc57285b089e9a1c193bf5636a9cfb1a671223a52cf7da65fe"
+    },
+    {
+      "path": "index.html",
+      "baselineSha256": "02db4ce289b8d28117aca3571c56720ce4e242fc8197bef201305e035b65f26d",
+      "finalSha256": "744ee2d81aae1ef0bbeb0a515b0a809ad5d8c5bedf7bb876ca0dbce4d87860f7"
+    },
+    {
+      "path": "LOCKED_MODULES.json",
+      "baselineSha256": "c97f69c733fb1ad96045998cb769cce58bcc833b9ea9cfd876373761a6de85ab",
+      "finalSha256": "c97f69c733fb1ad96045998cb769cce58bcc833b9ea9cfd876373761a6de85ab"
+    },
+    {
+      "path": "README_CMS07_RU.md",
+      "baselineSha256": "b167bd5c1b18a9b1192b38943b3cda1f4edd188e1113e3557f4204447f067b99",
+      "finalSha256": "b167bd5c1b18a9b1192b38943b3cda1f4edd188e1113e3557f4204447f067b99"
+    },
+    {
+      "path": "README_CMS08_RU.md",
+      "baselineSha256": "db8583491d03feb06a91d34049166e6c99f7a1d58d440490675b2dc4c24178e9",
+      "finalSha256": "db8583491d03feb06a91d34049166e6c99f7a1d58d440490675b2dc4c24178e9"
+    },
+    {
+      "path": "README_P0_P1_RU.md",
+      "baselineSha256": null,
+      "finalSha256": "e49eb31d67b2271932ff26cb3303d5a8147f33d8542c6d5de3a9eb2104555ec5"
+    },
+    {
+      "path": "README_RU.md",
+      "baselineSha256": "50854866ffdac72baccccdec9e4abb75b2f25c81fbaa1d186dab303cf0f54436",
+      "finalSha256": "50854866ffdac72baccccdec9e4abb75b2f25c81fbaa1d186dab303cf0f54436"
+    },
+    {
+      "path": "README_SYNC06_RU.md",
+      "baselineSha256": "7971c44c81532f5730c8bd93e51ff5250a801d0b259fe3563802dcf1db54b163",
+      "finalSha256": "7971c44c81532f5730c8bd93e51ff5250a801d0b259fe3563802dcf1db54b163"
+    },
+    {
+      "path": "tests/P0_P1_TEST_RESULTS.json",
+      "baselineSha256": null,
+      "finalSha256": "58693a6e8945fe9970c65fc0ee9f82881511701cb50635dfec8e3905a1698c4d"
+    },
+    {
+      "path": "tests/REGRESSION_CHECKLIST_RU.md",
+      "baselineSha256": "6bd0a7ebdec17eb40a050edf64211937d5db9a1458cd003b66b2880df1028d8d",
+      "finalSha256": "6bd0a7ebdec17eb40a050edf64211937d5db9a1458cd003b66b2880df1028d8d"
+    },
+    {
+      "path": "tests/test_admin_browser.py",
+      "baselineSha256": "a870d4e3f95a17991aec5b3c4e43a94a89fdb4cff7a9286d3b34f46a8b4eaf27",
+      "finalSha256": "55bec2b0bc2442746b3803e0752c9f12291b108f24678fa2a4bf6545572bf7ad"
+    },
+    {
+      "path": "tests/test_firestore_rules.cjs",
+      "baselineSha256": null,
+      "finalSha256": "9e5a74794b3e6cba9a5ad10dc655de87e3db18ca3ce88da8c211ea40a9117318"
+    },
+    {
+      "path": "tests/test_p0_p1.cjs",
+      "baselineSha256": null,
+      "finalSha256": "dd7d30bd7dd10b9e8a40a378d82deccc1c96f746230506a343d6b557181b0ca9"
+    },
+    {
+      "path": "tests/test_youtube_cover_preview.py",
+      "baselineSha256": "75ccbd92f3af7db51f7a6f289e59bddce33c26374685f079ffd97b00a4f77cb1",
+      "finalSha256": "75ccbd92f3af7db51f7a6f289e59bddce33c26374685f079ffd97b00a4f77cb1"
+    },
+    {
+      "path": "tests/test_youtube_only_policy.py",
+      "baselineSha256": "6cdd86c5d372b0577077cdb11e0815a922c591799955ea335c09c05f8e8c46fc",
+      "finalSha256": "6cdd86c5d372b0577077cdb11e0815a922c591799955ea335c09c05f8e8c46fc"
+    },
+    {
+      "path": "tests/verify_change_scope.cjs",
+      "baselineSha256": null,
+      "finalSha256": "9856d81db4e2915f9830ee08bd4a4937bc1d7afb019267d5293ca62996a682f6"
+    },
+    {
+      "path": "tests/verify_module_lock.py",
+      "baselineSha256": "53fa1492c44553fabb9f8600ca5c9025fc6d92086f8ed8ac283b585f47c40040",
+      "finalSha256": "53fa1492c44553fabb9f8600ca5c9025fc6d92086f8ed8ac283b585f47c40040"
+    }
+  ]
+}

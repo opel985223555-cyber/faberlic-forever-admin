@@ -1,41 +1,151 @@
-/* Firebase Auth + Firestore adapter. Does not contain private keys. */
+/* CMS-08 P0/P1: validated snapshots and optimistic Firestore transactions. */
 (() => {
  const A=window.FFAdmin;
- let sdk=null,app=null,auth=null,db=null;
+ let sdk=null,auth=null,db=null,pendingCreate=null;
  const cfg=window.FF_FIREBASE_CONFIG||{};
+ const fail=(message,code='cms/invalid-data')=>{const e=new Error(message);e.code=code;throw e;};
+ const conflict=()=>fail('Данные изменены другим администратором. Обновите страницу и повторите действие.','cms/conflict');
+ const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
+ const key=v=>typeof v==='string'&&v.length>0&&v.length<=512&&new TextEncoder().encode(v).length<=1000&&!v.includes('/')&&v!=='.'&&v!=='..'&&!/^__.*__$/.test(v);
+ const orderValue=v=>(typeof v==='number'||typeof v==='string'&&/^\d+$/.test(v))&&Number.isSafeInteger(Number(v))&&Number(v)>=0;
+ const revision=v=>{if(v===undefined)return 0;if(!Number.isSafeInteger(v)||v<0)fail('Некорректная редакция документа');return v;};
+ const leaf=v=>v.leafCategoryId||((v.topicId&&['social','ranks'].includes(v.categoryId))?v.categoryId+'__'+v.topicId:v.categoryId);
+ const scopeId=v=>leaf(v)+'~'+(v.language||'ru');
+ function catalog(items){
+  if(!Array.isArray(items)||items.length>1000)fail('Каталог должен быть массивом не более 1000 разделов');
+  const nodes=new Map();
+  for(const x of items){
+   if(!object(x)||!key(x.id)||nodes.has(x.id))fail('Некорректный или повторяющийся ID раздела');
+   if(x.parentId!==undefined&&x.parentId!==null&&!key(x.parentId))fail('Некорректный родитель раздела '+x.id);
+   if(!object(x.name)||typeof x.name.ru!=='string'||!x.name.ru.trim())fail('Нет русского названия раздела '+x.id);
+   for(const field of ['name','description'])if(x[field]!==undefined){if(!object(x[field]))fail('Некорректный перевод '+x.id);for(const lang of ['ru','tj','uz'])if(x[field][lang]!==undefined&&typeof x[field][lang]!=='string')fail('Некорректный перевод '+x.id);}
+   if(!['active','soon','hidden'].includes(x.status))fail('Некорректный статус раздела '+x.id);
+   if(x.order!==undefined&&!orderValue(x.order))fail('Некорректный порядок раздела '+x.id);
+   nodes.set(x.id,x);
+  }
+  for(const x of items){const seen=new Set();let cur=x,depth=0;while(cur){if(seen.has(cur.id))fail('Цикл в структуре категорий');seen.add(cur.id);if(depth++>20)fail('Максимальная глубина: 20 вложенных уровней');if(!cur.parentId)break;cur=nodes.get(cur.parentId);if(!cur)fail('Не найден родитель раздела '+x.id);}}
+  return items;
+ }
+ function lesson(v,write=false){
+  if(!object(v)||!key(v.id)||typeof v.title!=='string'||!v.title.trim()||typeof v.youtubeId!=='string'||!/^[-\w]{11}$/.test(v.youtubeId)||!key(v.categoryId)||!key(leaf(v)))fail('Некорректный урок '+(v?.id||''));
+  if(!['published','draft'].includes(v.status)||(v.language!==undefined&&!['ru','tj','uz'].includes(v.language)))fail('Некорректный язык или статус урока '+v.id);
+  if(v.youtubeUrl!==undefined&&typeof v.youtubeUrl!=='string')fail('Некорректная ссылка урока '+v.id);
+  if(v.groupId!==undefined&&v.groupId!==null&&typeof v.groupId!=='string')fail('Некорректная группа урока '+v.id);
+  if(v.topicId!==undefined&&v.topicId!==null&&typeof v.topicId!=='string'&&!Number.isSafeInteger(v.topicId))fail('Некорректная тема урока '+v.id);
+  if(v.description!==undefined&&typeof v.description!=='string')fail('Некорректное описание урока '+v.id);
+  if(v.orientation!==undefined&&!['vertical','horizontal'].includes(v.orientation))fail('Некорректный формат урока '+v.id);
+  if(v.order!==undefined&&!orderValue(v.order))fail('Некорректный порядок урока '+v.id);
+  revision(v.revision);if(v.orderRevision!==undefined)revision(v.orderRevision);
+  if(v.orderScopeId!==undefined&&v.orderScopeId!==scopeId(v))fail('Некорректная область порядка урока '+v.id);
+  if(write&&(v.title.length>160||(v.description||'').length>1200||!['ru','tj','uz'].includes(v.language)))fail('Поля урока не соответствуют форме');
+  return v;
+ }
+ function catalogDoc(snap){if(!snap.exists())return {items:null,revision:0};const data=snap.data();if(!object(data)||(data.version!==undefined&&data.version!==1))fail('Неизвестная схема каталога');return {items:catalog(data.items),revision:revision(data.revision)};}
+ const readLesson=s=>s.exists()?lesson({...s.data(),id:s.id}):null;
+ const timestamp=()=>sdk.db.serverTimestamp();
+ const scopeRef=id=>sdk.db.doc(db,'lessonOrderScopes',id);
+ function scopeDoc(s,id){if(!s.exists())return 0;const d=s.data();if(!object(d)||!key(d.leafCategoryId)||!['ru','tj','uz'].includes(d.language)||scopeId(d)!==id||revision(d.revision)<1)fail('Повреждена область порядка '+id);return revision(d.revision);}
+ function expectScope(s,id,baseline){const rev=scopeDoc(s,id);if(rev!==(baseline.orderRevisions[id]||0))conflict();if(rev>=Number.MAX_SAFE_INTEGER)fail('Редакция области достигла безопасного предела');return rev;}
+ function bump(tx,id,v,rev){tx.set(scopeRef(id),{leafCategoryId:leaf(v),language:v.language||'ru',revision:rev+1,updatedAt:timestamp()},{merge:true});}
+ function checkLesson(current,old){if(!current||!old||revision(current.revision)!==revision(old.revision)||scopeId(current)!==scopeId(old))conflict();if(revision(current.revision)>=Number.MAX_SAFE_INTEGER)fail('Редакция урока достигла безопасного предела');}
+ function checkCatalog(s,baseline){const c=catalogDoc(s);if(c.revision!==baseline.catalogRevision||Boolean(c.items)!==Boolean(baseline.catalog))conflict();return c.items||A.catalog.seed();}
+ function pendingKey(){return 'ff-cms08-pending:'+cfg.projectId+':'+A.state.currentUser?.uid;}
+ function loadPending(){try{return JSON.parse(sessionStorage.getItem(pendingKey())||'null');}catch{return null;}}
+ function storePending(value){pendingCreate=value;try{if(value)sessionStorage.setItem(pendingKey(),JSON.stringify(value));else sessionStorage.removeItem(pendingKey());}catch{/* Memory fallback without session storage. */}}
+ function prepareCreate(data){
+  const {order,...content}=data;const fingerprint=JSON.stringify(content);pendingCreate=pendingCreate||loadPending();
+  if(pendingCreate&&pendingCreate.fingerprint!==fingerprint)fail('Результат предыдущего создания ещё не подтверждён. Повторите исходное сохранение или откройте созданный урок для редактирования.','cms/pending-create');
+  if(!pendingCreate){const ref=sdk.db.doc(sdk.db.collection(db,'lessons'));storePending({id:ref.id,token:ref.id,fingerprint});}
+  return pendingCreate;
+ }
+ A.dataGuard={catalog,lesson,revision,leaf,scopeId,maxDepth:20};
  A.firebaseReady=()=>Boolean(cfg.apiKey&&cfg.projectId&&cfg.appId&&cfg.authDomain);
  A.firebase={
-   async init(onChange){
-     if(!A.firebaseReady())return false;
-     try{
-       const v='12.19.0';
-       const [core, authSdk, storeSdk] = await Promise.all([
-         import(`https://www.gstatic.com/firebasejs/${v}/firebase-app.js`),
-         import(`https://www.gstatic.com/firebasejs/${v}/firebase-auth.js`),
-         import(`https://www.gstatic.com/firebasejs/${v}/firebase-firestore.js`)
-       ]);
-       sdk={auth:authSdk,db:storeSdk};
-       app=core.initializeApp(cfg); auth=authSdk.getAuth(app); db=storeSdk.getFirestore(app);
-       authSdk.onAuthStateChanged(auth,async(user)=>{
-         if(!user){onChange(null);return}
-         try {
-           const adminDoc=await storeSdk.getDoc(storeSdk.doc(db,'admins',user.uid));
-           if(adminDoc.exists()&&adminDoc.data()?.active===true){onChange(user)}
-           else { await authSdk.signOut(auth);onChange(null);A.notify('Учётная запись не имеет прав администратора.','error') }
-         } catch(e){ await authSdk.signOut(auth);onChange(null);A.notify('Не удалось проверить права администратора: '+e.message,'error') }
-       });
-       return true;
-     }catch(e){A.notify('Ошибка соединения с Firebase: '+e.message,'error');return false;}
-   },
-   async signIn(email,password){ if(!sdk)throw new Error('Firebase ещё не настроен'); await sdk.auth.signInWithEmailAndPassword(auth,email,password);},
-   async signOut(){if(auth)await sdk.auth.signOut(auth);},
-   async listLessons(){const snap=await sdk.db.getDocs(sdk.db.collection(db,'lessons'));return snap.docs.map(x=>({id:x.id,...x.data()}));},
-   async upsertLesson(data,id){if(id){await sdk.db.updateDoc(sdk.db.doc(db,'lessons',id),{...data,updatedAt:sdk.db.serverTimestamp()});return id;}
-     const ref=await sdk.db.addDoc(sdk.db.collection(db,'lessons'),{...data,createdAt:sdk.db.serverTimestamp(),updatedAt:sdk.db.serverTimestamp()});return ref.id;},
-   async deleteLesson(id){await sdk.db.deleteDoc(sdk.db.doc(db,'lessons',id));},
-   async reorderLessons(ids){const batch=sdk.db.writeBatch(db);ids.forEach((id,i)=>batch.update(sdk.db.doc(db,'lessons',id),{order:i+1,updatedAt:sdk.db.serverTimestamp()}));await batch.commit();},
-   async listCatalog(){try{const snap=await sdk.db.getDoc(sdk.db.doc(db,'taxonomy','catalog'));return snap.exists()?snap.data().items||null:null;}catch(error){if(error.code==='permission-denied')return null;throw error;}},
-   async putCatalog(items){await sdk.db.setDoc(sdk.db.doc(db,'taxonomy','catalog'),{items,updatedAt:sdk.db.serverTimestamp(),version:1});}
-
+  async init(onChange){
+   if(!A.firebaseReady())return false;
+   try{
+    const v='12.19.0';const [core,authSdk,storeSdk]=await Promise.all([import(`https://www.gstatic.com/firebasejs/${v}/firebase-app.js`),import(`https://www.gstatic.com/firebasejs/${v}/firebase-auth.js`),import(`https://www.gstatic.com/firebasejs/${v}/firebase-firestore.js`)]);
+    sdk={auth:authSdk,db:storeSdk};const app=core.initializeApp(cfg);auth=authSdk.getAuth(app);db=storeSdk.getFirestore(app);
+    authSdk.onAuthStateChanged(auth,async user=>{
+     if(!user){pendingCreate=null;onChange(null);return;}
+     try{const admin=await storeSdk.getDoc(storeSdk.doc(db,'admins',user.uid));if(admin.exists()&&admin.data()?.active===true){onChange(user);}else{await authSdk.signOut(auth);onChange(null);A.notify('Учётная запись не имеет прав администратора.','error');}}
+     catch(e){await authSdk.signOut(auth);onChange(null);A.notify('Не удалось проверить права администратора: '+e.message,'error');}
+    });return true;
+   }catch(e){A.notify('Ошибка соединения с Firebase: '+e.message,'error');return false;}
+  },
+  async signIn(email,password){if(!sdk)throw Error('Firebase ещё не настроен');await sdk.auth.signInWithEmailAndPassword(auth,email,password);},
+  async signOut(){if(auth)await sdk.auth.signOut(auth);},
+  async listLessons(){const s=await sdk.db.getDocsFromServer(sdk.db.collection(db,'lessons'));return s.docs.map(readLesson);},
+  async listCatalog(){return catalogDoc(await sdk.db.getDocFromServer(sdk.db.doc(db,'taxonomy','catalog'))).items;},
+  async readSnapshot(){
+   // Locks precede lessons: a concurrent change leaves an older token and the
+   // next transaction rejects it instead of merging an inconsistent snapshot.
+   const scopes=await sdk.db.getDocsFromServer(sdk.db.collection(db,'lessonOrderScopes'));
+   const orderRevisions={};for(const s of scopes.docs)orderRevisions[s.id]=scopeDoc(s,s.id);
+   const c=catalogDoc(await sdk.db.getDocFromServer(sdk.db.doc(db,'taxonomy','catalog')));
+   const lessons=await A.firebase.listLessons();
+   const ids=new Set();for(const v of lessons){lesson(v);if(ids.has(v.id))fail('Повторяющийся ID урока');ids.add(v.id);}
+   const tree=c.items||A.catalog.seed();catalog(tree);
+   for(const v of lessons){let node=tree.find(x=>x.id===leaf(v));if(!node)fail('Категория урока '+v.id+' отсутствует в каталоге');while(node.parentId)node=tree.find(x=>x.id===node.parentId);if(node.id!==v.categoryId)fail('Привязка урока '+v.id+' не соответствует дереву');}
+   return {lessons,catalog:c.items,catalogRevision:c.revision,orderRevisions};
+  },
+  async upsertLesson(data,id,baseline){
+   if(data.id!==undefined)fail('ID урока передаётся отдельно');lesson({...data,id:id||'pending'},true);
+   const pending=id?null:prepareCreate(data);const targetId=id||pending.id;
+   const old=id?baseline.lessons.find(v=>v.id===id):null;
+   const targetScope=scopeId(data),oldScope=old?scopeId(old):null;
+   const affected=[...new Set([targetScope,oldScope].filter(Boolean))];
+   const members=baseline.lessons.filter(v=>affected.includes(scopeId(v)));
+   if(members.length>400)fail('В области более 400 уроков. Операция остановлена без изменений.');
+   const result=await sdk.db.runTransaction(db,async tx=>{
+    const ref=sdk.db.doc(db,'lessons',targetId);const existing=readLesson(await tx.get(ref));
+    if(pending&&existing){if(existing.clientRequestId===pending.token){for(const [k,v] of Object.entries(data))if(k!=='order'&&existing[k]!==v)conflict();return targetId;}conflict();}
+    const cat=checkCatalog(await tx.get(sdk.db.doc(db,'taxonomy','catalog')),baseline);
+    const category=cat.find(x=>x.id===leaf(data));if(!category)fail('Категория урока отсутствует');
+    let root=category;while(root.parentId)root=cat.find(x=>x.id===root.parentId);
+    if(root.id!==data.categoryId)fail('Категория урока не соответствует дереву');
+    const revisions={};for(const s of affected)revisions[s]=expectScope(await tx.get(scopeRef(s)),s,baseline);
+    const current=[];for(const v of members){const now=v.id===targetId?existing:readLesson(await tx.get(sdk.db.doc(db,'lessons',v.id)));checkLesson(now,v);current.push(now);}
+    if(id)checkLesson(existing,old);
+    const siblings=current.filter(v=>v.id!==targetId&&scopeId(v)===targetScope);
+    const order=old&&oldScope===targetScope?Math.max(1,Number(existing.order)||1):Math.max(0,...siblings.map(v=>Number(v.order)||0))+1;
+    if(!Number.isSafeInteger(order))fail('Порядок уроков достиг безопасного предела');
+    const patch={...data,order,revision:revision(existing?.revision)+1,orderScopeId:targetScope,orderRevision:revisions[targetScope]+1,updatedAt:timestamp()};
+    for(const s of affected)bump(tx,s,s===targetScope?data:old,revisions[s]);
+    if(id)tx.update(ref,patch);else tx.set(ref,{...patch,clientRequestId:pending.token,createdAt:timestamp()});
+    return targetId;
+   });
+   if(pending||(pendingCreate||loadPending())?.id===id)storePending(null);return result;
+  },
+  async deleteLesson(id,baseline){
+   const old=baseline.lessons.find(v=>v.id===id);if(!old)conflict();const s=scopeId(old);
+   await sdk.db.runTransaction(db,async tx=>{const ref=sdk.db.doc(db,'lessons',id),current=readLesson(await tx.get(ref));checkLesson(current,old);const rev=expectScope(await tx.get(scopeRef(s)),s,baseline);bump(tx,s,old,rev);tx.delete(ref);});
+  },
+  async reorderLessons(ids,baseline){
+   if(!Array.isArray(ids)||!ids.length||new Set(ids).size!==ids.length||ids.length>400)fail('Некорректный список перестановки (максимум 400 уроков)');
+   const first=baseline.lessons.find(v=>v.id===ids[0]);if(!first)conflict();const s=scopeId(first),members=baseline.lessons.filter(v=>scopeId(v)===s);
+   if(members.length!==ids.length||members.some(v=>!ids.includes(v.id)))fail('Перестановка должна включать один полный раздел и язык');
+   await sdk.db.runTransaction(db,async tx=>{
+    const rev=expectScope(await tx.get(scopeRef(s)),s,baseline);
+    for(const v of members)checkLesson(readLesson(await tx.get(sdk.db.doc(db,'lessons',v.id))),v);
+    bump(tx,s,first,rev);ids.forEach((id,i)=>{const old=members.find(v=>v.id===id);tx.update(sdk.db.doc(db,'lessons',id),{order:i+1,language:old.language||'ru',leafCategoryId:leaf(old),revision:revision(old.revision)+1,orderScopeId:s,orderRevision:rev+1,updatedAt:timestamp()});});
+   });
+  },
+  async putCatalog(items,baseline){
+   catalog(items);
+   await sdk.db.runTransaction(db,async tx=>{
+    const ref=sdk.db.doc(db,'taxonomy','catalog'),s=await tx.get(ref),old=catalogDoc(s);
+    if(old.revision!==baseline.catalogRevision||Boolean(old.items)!==Boolean(baseline.catalog))conflict();
+    if(old.revision>=Number.MAX_SAFE_INTEGER)fail('Редакция каталога достигла безопасного предела');
+    if(old.items?.some(x=>!items.some(y=>y.id===x.id)))fail('Удаление существующих категорий запрещено');
+    const moved=(old.items||[]).filter(x=>(x.parentId||null)!==(items.find(y=>y.id===x.id)?.parentId||null));
+    const affected=(old.items||[]).filter(x=>{let cur=x;while(cur){if(moved.some(m=>m.id===cur.id))return true;cur=old.items.find(y=>y.id===cur.parentId);}return false;});
+    if(baseline.lessons.some(v=>affected.some(x=>x.id===leaf(v))))fail('Нельзя переносить заполненный раздел');
+    if(affected.length>100)fail('Перенос слишком большого поддерева остановлен без изменений');
+    for(const x of affected)for(const language of ['ru','tj','uz']){const id=scopeId({leafCategoryId:x.id,language});expectScope(await tx.get(scopeRef(id)),id,baseline);}
+    const patch={items,revision:old.revision+1,version:1,updatedAt:timestamp()};
+    if(s.exists())tx.update(ref,patch);else tx.set(ref,patch);
+   });
+  }
  };
 })();

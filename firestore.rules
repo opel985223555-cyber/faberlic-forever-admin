@@ -1,38 +1,95 @@
+// PROPOSED CMS-08 P0/P1 RULES. Not deployed. Test in Emulator Suite before publishing.
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    function isAdmin() {
-      return request.auth != null
-        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
-    }
-
-    match /admins/{uid} {
-      allow get: if request.auth != null && request.auth.uid == uid;
-      allow list, create, update, delete: if false;
-    }
-
-    match /lessons/{lessonId} {
-      // Future user application: MUST query with status == 'published'.
-      allow get, list: if isAdmin() || resource.data.status == 'published';
-      allow create: if isAdmin()
-        && request.resource.data.keys().hasAll(['title','youtubeId','categoryId','language','status'])
-        && request.resource.data.status in ['published','draft']
-        && request.resource.data.language in ['ru','tj','uz'];
-      allow update: if isAdmin()
-        && request.resource.data.status in ['published','draft']
-        && request.resource.data.language in ['ru','tj','uz'];
-      allow delete: if isAdmin();
-    }
-
-    match /taxonomy/{docId} {
-      allow get: if docId == 'catalog';
-      allow list: if false;
-      allow create, update: if docId == 'catalog' && isAdmin();
-      allow delete: if false;
-    }
-
-    // No other collections are accessible yet.
-    match /{document=**} { allow read, write: if false; }
+ match /databases/{database}/documents {
+  function isAdmin() {
+   return request.auth != null
+    && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+    && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
   }
+  function validId(id) { return id is string && id.size() > 0 && id.size() <= 512 && id.toUtf8().size() <= 1000 && !id.matches('.*[/].*'); }
+  function leaf(d) {
+   return d.get('leafCategoryId', null) != null ? d.leafCategoryId
+    : (d.categoryId in ['social','ranks'] && d.get('topicId', null) != null
+      ? d.categoryId + '__' + string(d.topicId) : d.categoryId);
+  }
+  function scopeId(d) { return leaf(d) + '~' + d.get('language','ru'); }
+  function advanced(id) {
+   let p = /databases/$(database)/documents/lessonOrderScopes/$(id);
+   return getAfter(p).data.revision == (exists(p) ? get(p).data.revision : 0) + 1;
+  }
+  function validScope(d) {
+   return d.keys().hasAll(['leafCategoryId','language','revision','updatedAt'])
+    && d.keys().hasOnly(['leafCategoryId','language','revision','updatedAt'])
+    && validId(d.leafCategoryId) && d.language in ['ru','tj','uz']
+    && d.revision is int && d.revision > 0 && d.updatedAt == request.time;
+  }
+  function validLesson(d) {
+   return d.keys().hasAll(['title','youtubeId','categoryId','leafCategoryId','language','status','order','revision','orderScopeId','orderRevision','updatedAt'])
+    && d.title is string && d.title.trim().size() > 0 && d.title.size() <= 160
+    && d.youtubeId is string && d.youtubeId.matches('^[A-Za-z0-9_-]{11}$')
+    && validId(d.categoryId) && validId(d.leafCategoryId)
+    && d.language in ['ru','tj','uz'] && d.status in ['published','draft']
+    && d.order is int && d.order > 0 && d.revision is int && d.revision > 0
+    && d.orderRevision is int && d.orderRevision > 0
+    && (!('description' in d) || (d.description is string && d.description.size() <= 1200))
+    && (!('orientation' in d) || d.orientation in ['vertical','horizontal'])
+    && (!('youtubeUrl' in d) || d.youtubeUrl is string)
+    && d.orderScopeId == scopeId(d) && d.updatedAt == request.time;
+  }
+  function linkedScope(d) {
+   let p = /databases/$(database)/documents/lessonOrderScopes/$(d.orderScopeId);
+   return advanced(d.orderScopeId)
+    && getAfter(p).data.leafCategoryId == leaf(d)
+    && getAfter(p).data.language == d.language
+    && getAfter(p).data.revision == d.orderRevision;
+  }
+  function validCatalog(d) {
+   return d.keys().hasAll(['items','revision','version','updatedAt'])
+    && d.items is list && d.items.size() <= 1000
+    && d.revision is int && d.revision > 0 && d.version == 1
+    && d.updatedAt == request.time;
+  }
+  match /admins/{uid} {
+   allow get: if request.auth != null && request.auth.uid == uid;
+   allow list, create, update, delete: if false;
+  }
+  match /lessons/{lessonId} {
+   allow get, list: if isAdmin() || resource.data.status == 'published';
+   allow create: if isAdmin() && validLesson(request.resource.data)
+    && request.resource.data.revision == 1
+    && request.resource.data.clientRequestId == lessonId
+    && request.resource.data.createdAt == request.time
+    && linkedScope(request.resource.data);
+   allow update: if isAdmin() && validLesson(request.resource.data)
+    && request.resource.data.revision == resource.data.get('revision',0) + 1
+    && request.resource.data.get('createdAt',null) == resource.data.get('createdAt',null)
+    && request.resource.data.get('clientRequestId',null) == resource.data.get('clientRequestId',null)
+    && linkedScope(request.resource.data)
+    && (scopeId(resource.data) == scopeId(request.resource.data) || advanced(scopeId(resource.data)));
+   allow delete: if isAdmin() && advanced(scopeId(resource.data));
+  }
+  match /lessonOrderScopes/{id} {
+   allow read: if isAdmin();
+   allow create: if isAdmin() && validScope(request.resource.data)
+    && id == scopeId(request.resource.data) && request.resource.data.revision == 1;
+   allow update: if isAdmin() && validScope(request.resource.data)
+    && id == scopeId(request.resource.data)
+    && request.resource.data.leafCategoryId == resource.data.leafCategoryId
+    && request.resource.data.language == resource.data.language
+    && request.resource.data.revision == resource.data.revision + 1;
+   allow delete: if false;
+  }
+  match /taxonomy/{docId} {
+   allow get: if docId == 'catalog';
+   allow list, delete: if false;
+   allow create: if docId == 'catalog' && isAdmin() && validCatalog(request.resource.data)
+    && request.resource.data.revision == 1;
+   allow update: if docId == 'catalog' && isAdmin() && validCatalog(request.resource.data)
+    && resource.data.items is list
+    && request.resource.data.items.size() >= resource.data.items.size()
+    && request.resource.data.revision == resource.data.get('revision',0) + 1;
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
 }
