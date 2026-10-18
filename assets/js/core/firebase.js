@@ -75,12 +75,49 @@
   },
   async signIn(email,password){if(!sdk)throw Error('Firebase ещё не настроен');await sdk.auth.signInWithEmailAndPassword(auth,email,password);},
   async signOut(){if(auth)await sdk.auth.signOut(auth);},
+  // CMS10: independent collections. No change to lessons/taxonomy transactions.
+  async listContent(collectionName){
+   if(!['materials','liveStreams'].includes(collectionName))throw Error('Неизвестная коллекция');
+   if(!db||!A.state.currentUser)throw Error('Нет авторизации');
+   const snapshot=await sdk.db.getDocsFromServer(sdk.db.collection(db,collectionName));
+   return snapshot.docs.map(s=>({...s.data(),id:s.id}));
+  },
+  async saveContent(collectionName,payload,id,expectedRevision){
+   if(!['materials','liveStreams'].includes(collectionName))throw Error('Неизвестная коллекция');
+   if(!db||!A.state.currentUser)throw Error('Нет авторизации');
+   const col=sdk.db.collection(db,collectionName);
+   if(!id){
+    const ref=sdk.db.doc(col);
+    await sdk.db.setDoc(ref,{...payload,revision:1,createdAt:sdk.db.serverTimestamp(),updatedAt:sdk.db.serverTimestamp()});
+    return ref.id;
+   }
+   const ref=sdk.db.doc(db,collectionName,id);
+   await sdk.db.runTransaction(db,async tx=>{
+    const snap=await tx.get(ref);
+    if(!snap.exists()||snap.data().revision!==expectedRevision)throw Error('Эта запись изменилась. Обнови список и повтори.');
+    tx.update(ref,{...payload,revision:expectedRevision+1,updatedAt:sdk.db.serverTimestamp()});
+   });
+   return id;
+  },
+  async deleteContent(collectionName,id,expectedRevision){
+   if(!['materials','liveStreams'].includes(collectionName))throw Error('Неизвестная коллекция');
+   if(!db||!A.state.currentUser)throw Error('Нет авторизации');
+   const ref=sdk.db.doc(db,collectionName,id);
+   await sdk.db.runTransaction(db,async tx=>{
+    const snap=await tx.get(ref);
+    if(!snap.exists()||snap.data().revision!==expectedRevision)throw Error('Запись изменилась или удалена. Обнови список.');
+    tx.delete(ref);
+   });
+  },
   async listLessons(){const s=await sdk.db.getDocsFromServer(sdk.db.collection(db,'lessons'));return s.docs.map(readLesson);},
   async listCatalog(){return catalogDoc(await sdk.db.getDocFromServer(sdk.db.doc(db,'taxonomy','catalog'))).items;},
   async readSnapshot(){
    // Locks precede lessons: a concurrent change leaves an older token and the
    // next transaction rejects it instead of merging an inconsistent snapshot.
-   const scopes=await sdk.db.getDocsFromServer(sdk.db.collection(db,'lessonOrderScopes'));
+   // Diagnose the collection responsible for initial-load failures. Without the
+   // lessonOrderScopes read permission the older UI only showed a generic form error.
+   const scopes=await sdk.db.getDocsFromServer(sdk.db.collection(db,'lessonOrderScopes'))
+    .catch(e=>{throw new Error('lessonOrderScopes: '+(e.code||e.message)+'. Проверь правила Firestore CMS10.');});
    const orderRevisions={};for(const s of scopes.docs)orderRevisions[s.id]=scopeDoc(s,s.id);
    const c=catalogDoc(await sdk.db.getDocFromServer(sdk.db.doc(db,'taxonomy','catalog')));
    const lessons=await A.firebase.listLessons();

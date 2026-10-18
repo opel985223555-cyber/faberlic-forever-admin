@@ -1,0 +1,25 @@
+{
+  "base_archive": "Faberlic_Forever_Admin_CMS08_P0_P1_FIXED_FULL.zip",
+  "base_sha256": "5d03af6bf6d1c791b132721a1361a3613cd6d56569eaaf1384168023f2ccc6c2",
+  "changed_files": [
+    "CHANGESET_CMS10.json",
+    "LOCKED_MODULES.json",
+    "README_CMS10_RU.md",
+    "assets/css/live.css",
+    "assets/js/core/firebase.js",
+    "assets/js/core/repository.js",
+    "assets/js/core/shell.js",
+    "assets/js/main.js",
+    "assets/js/modules/live.js",
+    "assets/js/modules/materials.js",
+    "firestore.rules",
+    "index.html",
+    "tests/test_content_cms10.cjs",
+    "tests/verify_change_scope.cjs"
+  ],
+  "unchanged_files_count": 33,
+  "deleted_files": [],
+  "remote_services_modified": false,
+  "firebase_rules_deployed": false,
+  "android_apk_built": false
+}

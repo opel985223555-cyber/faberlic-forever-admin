@@ -1,1 +1,12 @@
 .future-module{padding:70px 22px;text-align:center}.future-icon{width:78px;height:78px;margin:auto auto 22px;border:1px solid #d4ff3955;border-radius:21px;display:grid;place-items:center;background:#d4ff3911;color:var(--lime);font-size:31px}.future-module h2{font-size:18px;margin:0 0 10px}.future-module p{font-size:13px;color:var(--muted);max-width:480px;margin:auto;line-height:1.7}
+
+/* CMS10: scoped to new content editors, no changes to approved navigation. */
+.content-record{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:17px 21px;border-bottom:1px solid var(--border,#303630)}
+.content-record:last-child{border-bottom:0}
+.content-record-main{min-width:0;flex:1}
+.content-record-main strong{display:block;font-size:14px;overflow-wrap:anywhere}
+.content-record-main small{display:block;color:var(--muted,#a6ada5);margin-top:6px;line-height:1.55}
+.content-record-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.content-record-actions .small-button{cursor:pointer}
+.content-list-status{padding:20px;color:var(--muted,#a6ada5);font-size:13px}
+@media(max-width:680px){.content-record{flex-direction:column;align-items:stretch}.content-record-actions{justify-content:flex-end}}
