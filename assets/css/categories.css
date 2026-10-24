@@ -2,3 +2,12 @@
 
 /* CMS-12: keep category controls reachable on narrow screens. */
 .catalog-item{flex-wrap:wrap}.catalog-item>div:nth-child(2){min-width:120px;overflow-wrap:anywhere}.category-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;max-width:100%}
+
+/* Availability is visible without opening the category editor. */
+.catalog-title{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.catalog-item.is-restricted{background:rgba(239,68,68,.07);box-shadow:inset 3px 0 0 #df6e6e}
+.catalog-item.is-restricted .number-icon{background:#452727;color:#ffb4b4}
+.category-state-badge{display:inline-block;padding:4px 8px;border:1px solid #a84f4f;border-radius:6px;background:#452727;color:#ffc5c5;font-size:10px;font-weight:700;line-height:1.3}
+.catalog-item.is-restricted [data-category-access][data-access-mode="active"]{border-color:#b85a5a;background:#512a2a;color:#ffd4d4}
+.catalog-item.is-restricted [data-category-access][data-access-mode="active"]:hover{background:#6b3232}
+.catalog-item.is-restricted [data-category-access][data-access-mode="active"]:focus-visible{outline:2px solid #ffb4b4;outline-offset:2px}
