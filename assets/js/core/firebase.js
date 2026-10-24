@@ -50,6 +50,13 @@
  function bump(tx,id,v,rev){tx.set(scopeRef(id),{leafCategoryId:leaf(v),language:v.language||'ru',revision:rev+1,updatedAt:timestamp()},{merge:true});}
  function checkLesson(current,old){if(!current||!old||revision(current.revision)!==revision(old.revision)||scopeId(current)!==scopeId(old))conflict();if(revision(current.revision)>=Number.MAX_SAFE_INTEGER)fail('Редакция урока достигла безопасного предела');}
  function checkCatalog(s,baseline){const c=catalogDoc(s);if(c.revision!==baseline.catalogRevision||Boolean(c.items)!==Boolean(baseline.catalog))conflict();return c.items||A.catalog.seed();}
+ // Firestore maps have no stable key order. Array order remains significant.
+ function sameValue(a,b){
+  if(a===b)return true;
+  if(Array.isArray(a)||Array.isArray(b))return Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((value,i)=>sameValue(value,b[i]));
+  if(!object(a)||!object(b))return false;
+  const keys=Object.keys(a);return keys.length===Object.keys(b).length&&keys.every(k=>Object.prototype.hasOwnProperty.call(b,k)&&sameValue(a[k],b[k]));
+ }
  const guardRef=()=>sdk.db.doc(db,'catalogGuards','membership');
  function guardDoc(s){const d=s.exists()?s.data():{revision:0};revision(d.revision);if(d.protocol===13){if(!object(d.counts))fail('Повреждён индекс категорий');for(const n of Object.values(d.counts))revision(n);}return d;}
  function metadata(items,old={}){
@@ -219,14 +226,14 @@
    const inv=await inventory();
    await sdk.db.runTransaction(db,async tx=>{
     const ref=sdk.db.doc(db,'taxonomy','catalog'),snap=await tx.get(ref),old=checkCatalog(snap,baseline),guard=expectGuard(await tx.get(guardRef()),inv.guard);
-    if(JSON.stringify(old)===JSON.stringify(items))return;
+    if(sameValue(old,items))return;
     const before=snap.data(),removed=old.filter(x=>!items.some(y=>y.id===x.id));
     if(removed.length>1)fail('Удаляйте категории по одной');
     for(const x of removed){if(old.some(y=>y.parentId===x.id))fail('Сначала перенесите или удалите вложенные категории');if((guard.counts[x.id]||0)>0||inv.lessons.some(v=>leaf(v)===x.id||v.categoryId===x.id))fail('Категория содержит видео. Сначала перенесите или удалите видео вручную.');}
     for(const x of old){const next=items.find(y=>y.id===x.id);if(next&&(x.parentId||null)!==(next.parentId||null)&&inv.lessons.some(v=>metadata(old).paths[leaf(v)]?.includes(x.id)))fail('Нельзя переносить заполненный раздел');}
     const actualCounts=countLessons(old,inv.lessons);for(const id of new Set([...Object.keys(guard.counts),...Object.keys(actualCounts)]))if((guard.counts[id]||0)!==(actualCounts[id]||0))fail('Индекс видео не совпадает с базой. Изменение остановлено без потери данных.');
     countLessons(items,inv.lessons);
-    const changed=old.map((x,i)=>JSON.stringify(x)!==JSON.stringify(items.find(y=>y.id===x.id))?i:-1).filter(i=>i>=0&&items.some(y=>y.id===old[i].id));
+    const changed=old.map((x,i)=>!sameValue(x,items.find(y=>y.id===x.id))?i:-1).filter(i=>i>=0&&items.some(y=>y.id===old[i].id));
     const added=items.filter(x=>!old.some(y=>y.id===x.id));
     if(added.length>1||changed.length>2)fail('Сохраняйте изменения категорий по одному действию');
     const kind=removed.length?'delete':added.length?'add':changed.length===2?'reorder':'edit';
