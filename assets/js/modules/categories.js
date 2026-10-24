@@ -1,6 +1,7 @@
 /* CMS-08: editable content taxonomy. Existing IDs are immutable: lesson references remain intact. */
 (()=>{
  const A=window.FFAdmin;
+ const availability=A.categoryAvailability;
  let editingRevision;
  const seed=()=>Array.isArray(window.FF_CATALOG_DEFAULTS)
    ? structuredClone(window.FF_CATALOG_DEFAULTS)
@@ -17,20 +18,22 @@
  const published=id=>A.state.lessons.some(v=>v.status==='published'&&(leaf(v)===id||isChild(leaf(v),id)));
  const ensure=async()=>{if(A.state.catalog)return;await A.repo.saveCatalog(seed());await A.refreshAll();};
  // Hidden and 'soon' sections must remain selectable by the administrator, especially when editing an existing lesson.
- function listOptions(){const ordered=[],visited=new Set();function visit(parent,depth=0){if(depth>20)return;for(const x of children(parent)){if(visited.has(x.id))continue;visited.add(x.id);const suffix=x.status==='hidden'?' [Скрыт]':x.status==='soon'?' [Скоро]':'';ordered.push([x.id,breadcrumb(x.id)+suffix]);visit(x.id,depth+1);}}visit(null);return ordered;}
+ function listOptions(){const ordered=[],visited=new Set();function visit(parent,depth=0){if(depth>20)return;for(const x of children(parent)){if(visited.has(x.id))continue;visited.add(x.id);const suffix=x.status==='hidden'?' [Скрыт]':availability.mode(x)==='maintenance'?' [Техническое обслуживание]':x.status==='soon'?' [Скоро]':'';ordered.push([x.id,breadcrumb(x.id)+suffix]);visit(x.id,depth+1);}}visit(null);return ordered;}
  const selectHTML=(selected='newbie')=>listOptions().map(([id,l])=>`<option value="${A.escape(id)}" ${selected===id?'selected':''}>${A.escape(l)}</option>`).join('');
  function edit(id){const x=node(id);if(!x)return;editingRevision=A.state.catalogRevision;A.$('#category-edit-id').value=x.id;A.$('#category-parent').value=x.parentId||'';
    for(const lang of ['ru','tj','uz']){A.$('#category-name-'+lang).value=x.name?.[lang]||'';A.$('#category-desc-'+lang).value=x.description?.[lang]||'';}
-   A.$('#category-status').value=x.status||'active';A.$('#category-form-title').textContent='Редактировать раздел';A.$('#category-save').textContent='Сохранить изменения';A.$('#category-form').scrollIntoView({behavior:'smooth',block:'start'});
+   A.$('#category-status').value=availability.mode(x)||'active';A.$('#category-form-title').textContent='Редактировать раздел';A.$('#category-save').textContent='Сохранить изменения';A.$('#category-form').scrollIntoView({behavior:'smooth',block:'start'});
  }
  function clear(){editingRevision=undefined;A.$('#category-form').reset();A.$('#category-edit-id').value='';A.$('#category-form-title').textContent='Добавить раздел';A.$('#category-save').textContent='Добавить раздел';}
  function render(){const holder=A.$('#categories-list');if(!holder)return;
    A.$('#category-parent').innerHTML='<option value="">Главная категория</option>'+listOptions().map(([id,n])=>`<option value="${A.escape(id)}">${A.escape(n)}</option>`).join('');
    A.$('#catalog-init-note').hidden=Boolean(A.state.catalog);
    const ordered=[];const visited=new Set();function visit(parent,depth=0){if(depth>20)return;for(const x of children(parent)){if(visited.has(x.id))continue;visited.add(x.id);ordered.push({...x,_depth:depth});visit(x.id,depth+1);}}visit(null);
-   holder.innerHTML=ordered.map(x=>{let status=x.status==='soon'?'Скоро':x.status==='hidden'?'Скрыт':'Открыт';
+   holder.innerHTML=ordered.map(x=>{const mode=availability.mode(x),access=availability.effective(items(),x.id);let status=mode==='maintenance'?'Закрыто на техническое обслуживание':x.status==='soon'?'Скоро':x.status==='hidden'?'Скрыт':'Открыт';
      if(x.status==='active'&&!published(x.id))status='Скоро · нет опубликованных уроков';
-     return `<div class="catalog-item" style="gap:12px;padding-left:${Math.min(x._depth,6)*16}px"><div class="number-icon">${x.parentId?'↳':'▦'}</div><div><strong>${A.escape(breadcrumb(x.id))}</strong><small>${A.escape(x.description?.ru||'Без описания')} · ${status}</small></div><button type="button" class="small-button" data-category-edit="${A.escape(x.id)}">Изменить</button><button type="button" class="small-button" data-category-delete="${A.escape(x.id)}">Удалить</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="-1" aria-label="Выше">↑</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="1" aria-label="Ниже">↓</button></div>`;}).join('');
+     if(access.blockedBy&&access.blockedBy!==x.id)status+=' · '+(access.mode==='hidden'?'Родительский раздел скрыт':'Родительский раздел закрыт');
+     const actions=[['active','Открыть'],['hidden','Скрыть'],['maintenance','Закрыть']].filter(([value])=>value!==mode).map(([value,text])=>`<button type="button" class="small-button" data-category-access="${A.escape(x.id)}" data-access-mode="${value}">${text}</button>`).join('');
+     return `<div class="catalog-item" style="gap:12px;padding-left:${Math.min(x._depth,6)*16}px"><div class="number-icon">${x.parentId?'↳':'▦'}</div><div><strong>${A.escape(breadcrumb(x.id))}</strong><small>${A.escape(x.description?.ru||'Без описания')} · ${status}</small></div><div class="category-actions"><button type="button" class="small-button" data-category-edit="${A.escape(x.id)}">Изменить</button><button type="button" class="small-button" data-category-delete="${A.escape(x.id)}">Удалить</button>${actions}<button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="-1" aria-label="Выше">↑</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="1" aria-label="Ниже">↓</button></div></div>`;}).join('');
    A.modules.videos?.refreshCategoryOptions?.();
  }
  const normalize=(all,parentId)=>{const rows=all.filter(x=>(x.parentId||null)===(parentId||null)).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||a.id.localeCompare(b.id));rows.forEach((x,i)=>{x.order=i+1;});};
@@ -44,7 +47,7 @@
    const fresh=items().map(x=>structuredClone(x));const key=id||'section_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
    if(!existing&&fresh.some(x=>x.id===key)){A.notify('Раздел уже существует','error');return;}
    const moved=Boolean(existing&&existing.parentId!==parent);
-   const next={...existing,id:key,parentId:parent,name,description,status:A.$('#category-status').value,order:moved||!existing?Math.max(0,...fresh.filter(x=>(x.parentId||null)===parent&&x.id!==key).map(x=>Number(x.order)||0))+1:existing.order};
+   const next=availability.apply({...existing,id:key,parentId:parent,name,description,order:moved||!existing?Math.max(0,...fresh.filter(x=>(x.parentId||null)===parent&&x.id!==key).map(x=>Number(x.order)||0))+1:existing.order},A.$('#category-status').value);
    const index=fresh.findIndex(x=>x.id===key);if(index>=0)fresh[index]=next;else fresh.push(next);
    normalize(fresh,parent);if(moved)normalize(fresh,existing.parentId);
    try{A.dataGuard.catalog(fresh);}catch(err){A.notify(err.message,'error');return;}
@@ -55,6 +58,19 @@
  async function shift(id,delta){if(A.state.busy)return;const x=node(id);if(!x)return;const siblings=children(x.parentId),index=siblings.findIndex(r=>r.id===id),other=siblings[index+delta];if(!other)return;
    const all=items().map(x=>structuredClone(x));const ids=siblings.map(x=>x.id);[ids[index],ids[index+delta]]=[ids[index+delta],ids[index]];ids.forEach((id,i)=>all.find(x=>x.id===id).order=i+1);
    A.state.busy=true;try{await A.repo.saveCatalog(all);await A.refreshAll();A.notify('Порядок разделов сохранён');}catch(err){A.notify('Не удалось изменить порядок: '+err.message,'error');}finally{A.state.busy=false;}
+ }
+ async function changeAccess(id,value){
+   if(A.state.busy)return;const x=node(id);if(!x||availability.mode(x)===value)return;
+   const title=label(id),verb=value==='hidden'?'Скрыть':value==='maintenance'?'Закрыть на техническое обслуживание':'Открыть';
+   if(value!=='active'&&!window.confirm(verb+' категорию «'+title+'»? Ограничение распространяется на вложенные категории. Видео сохранятся.'))return;
+   const revision=A.state.catalogRevision;
+   const fresh=items().map(row=>row.id===id?availability.apply(row,value):structuredClone(row));
+   A.state.busy=true;
+   try{await A.repo.saveCatalog(fresh,revision);
+     try{await A.refreshAll();const access=availability.effective(items(),id);A.notify(value==='active'&&access.blockedBy?'Категория открыта, но доступ ограничен родительской категорией':value==='active'?'Категория открыта':value==='hidden'?'Категория скрыта':'Категория закрыта на техническое обслуживание');}
+     catch(err){A.notify('Доступность сохранена, но список не обновлён. Обновите страницу: '+err.message,'error');}
+   }catch(err){A.notify('Не удалось изменить доступность: '+err.message,'error');try{await A.refreshAll();}catch{/* Load failure blocks further writes. */}}
+   finally{A.state.busy=false;}
  }
  async function remove(id){
    if(A.state.busy)return;const x=node(id);if(!x)return;
@@ -70,7 +86,7 @@
  }
  function init(){A.$on(A.$('#category-form'),'submit',save);A.$on(A.$('#category-new'),'click',clear);
    A.$on(A.$('#catalog-init'),'click',async()=>{if(A.state.busy)return;A.state.busy=true;A.$('#catalog-init').disabled=true;try{await ensure();A.notify('Структура категорий опубликована');}catch(e){A.notify('Не удалось опубликовать структуру. Проверь правила Firestore: '+e.message,'error');}finally{A.state.busy=false;A.$('#catalog-init').disabled=false;}});
-   A.$on(A.$('#categories-list'),'click',e=>{const b=e.target.closest('[data-category-edit],[data-category-shift],[data-category-delete]');if(!b||A.state.busy)return;if(b.dataset.categoryDelete)remove(b.dataset.categoryDelete);else if(b.dataset.categoryEdit)edit(b.dataset.categoryEdit);else if(b.dataset.categoryShift)shift(b.dataset.categoryShift,Number(b.dataset.step));});
+   A.$on(A.$('#categories-list'),'click',e=>{const b=e.target.closest('[data-category-edit],[data-category-shift],[data-category-delete],[data-category-access]');if(!b||A.state.busy)return;if(b.dataset.categoryAccess)changeAccess(b.dataset.categoryAccess,b.dataset.accessMode);else if(b.dataset.categoryDelete)remove(b.dataset.categoryDelete);else if(b.dataset.categoryEdit)edit(b.dataset.categoryEdit);else if(b.dataset.categoryShift)shift(b.dataset.categoryShift,Number(b.dataset.step));});
  }
  A.catalog={items,node,children,label,ancestor,isChild,breadcrumb,selectHTML,seed};A.modules.categories={init,render};
 })();

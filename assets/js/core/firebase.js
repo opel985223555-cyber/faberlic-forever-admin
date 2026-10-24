@@ -21,6 +21,7 @@
    for(const field of ['name','description'])if(x[field]!==undefined){if(!object(x[field]))fail('Некорректный перевод '+x.id);for(const lang of ['ru','tj','uz'])if(x[field][lang]!==undefined&&typeof x[field][lang]!=='string')fail('Некорректный перевод '+x.id);}
    if(!['active','soon','hidden'].includes(x.status))fail('Некорректный статус раздела '+x.id);
    if(x.order!==undefined&&!orderValue(x.order))fail('Некорректный порядок раздела '+x.id);
+   A.categoryAvailability.validate(x);
    nodes.set(x.id,x);
   }
   for(const x of items){const seen=new Set();let cur=x,depth=0;while(cur){if(seen.has(cur.id))fail('Цикл в структуре категорий');seen.add(cur.id);if(depth++>20)fail('Максимальная глубина: 20 вложенных уровней');if(!cur.parentId)break;cur=nodes.get(cur.parentId);if(!cur)fail('Не найден родитель раздела '+x.id);}}
