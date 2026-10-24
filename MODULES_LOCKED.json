@@ -1,0 +1,78 @@
+{
+  "version": "v0.9.8 CMS-10 (viewer controls and content modules)",
+  "stable_ui": "Approved CMS07 design retained. Authorized changes to top-of-lesson player toolbar metadata/fullscreen and independent Firestore live/materials. No changes to splash, core navigation, categories, home, favorites.",
+  "old_monolith": "app.v09.before_modularization.js.backup (not loaded)",
+  "modules": {
+    "core": [
+      "core/core.js",
+      "core/navigation.js"
+    ],
+    "home": [
+      "modules/home.js"
+    ],
+    "categories": [
+      "modules/categories.js",
+      "modules/categories.css",
+      "modules/learning-paths-data.js"
+    ],
+    "live": [
+      "modules/live.js"
+    ],
+    "materials": [
+      "modules/materials.js"
+    ],
+    "favorites": [
+      "modules/favorites.js"
+    ],
+    "lesson": [
+      "modules/lesson.js"
+    ],
+    "launch_animation": [
+      "splash/index.html",
+      "splash/splash.css",
+      "splash/splash.js",
+      "splash/logo.png"
+    ],
+    "shared_data": [
+      "data.js"
+    ],
+    "firebase_lessons_readonly": [
+      "modules/firebase-lessons.js",
+      "app/src/main/java/tj/faberlic/forever/PublishedLessonsBridge.java"
+    ],
+    "youtube_covers": [
+      "modules/youtube-covers.js"
+    ]
+  },
+  "rule": "Edit only target module; shared core changes require separate approval + regression test",
+  "unchanged_checksum": {
+    "base_css_sha256": "1497a94f50e9e07eb598ab7033f27b50bc3119ae2ddc64a63d17406405ec078d"
+  },
+  "baseline_sha256": {
+    "app/src/main/assets/www/index.html": "798a3a855f8a82bb73b37ab8ad0113a0f7ebae85c8ebafd93f326fdf4466422c",
+    "app/src/main/assets/www/styles.css": "1497a94f50e9e07eb598ab7033f27b50bc3119ae2ddc64a63d17406405ec078d",
+    "app/src/main/assets/www/data.js": "c3bb52d7c24d12c325bc3f5ebbeda4de741f19c6b306c72810467c5eef821962",
+    "app/src/main/assets/www/core/core.js": "57f05034515ea97123350908be9b0854b7f9830347c9739621eccb08a9b1f365",
+    "app/src/main/assets/www/core/navigation.js": "7ae3573375d8c343b4ae154f5188f881885b19a425ae8bf818b5b46e3af64e30",
+    "app/src/main/assets/www/modules/home.js": "fc095f23b1b9c9a6ac1194fd5b7ed85cdce12f4e1c5eb833c8a342fff51ed27e",
+    "app/src/main/assets/www/modules/categories.js": "a93ddc4354228ef86f282385ef90accfb76a516f9720f1b345e58b06aab23ce0",
+    "app/src/main/assets/www/modules/categories.css": "787a06d06b52f08190165537f18f195423176da7fc7dd2616e2d13f9afc0cc10",
+    "app/src/main/assets/www/modules/learning-paths-data.js": "2ce063b73e643ba001bc3da0bad279e26ef2ea4c9003506b8404dc2e91517e9c",
+    "app/src/main/assets/www/modules/live.js": "c793789696a8d435da754b9879951c8bf14e037a7f8a5fff2581120fbe837e3b",
+    "app/src/main/assets/www/modules/materials.js": "ca76226a11bce4ddd126bc059a55f7b229b503287f3a9f3dbc2db7e4750455db",
+    "app/src/main/assets/www/modules/favorites.js": "f8e6249a5718ac837aa2a93e91af9a73ff8f054038d55ba4c351c01a4967cf2d",
+    "app/src/main/assets/www/modules/lesson.js": "2b53f7df3f644ab9b4415214e14ad6fd4fa9fc3e4f64202ce7084379ddfbc4c7",
+    "app/src/main/assets/www/splash/index.html": "1a34ae92915558bc953d40fc70f9c8fad76fe1731a0c1dcd7a34fc1f42b04b7a",
+    "app/src/main/assets/www/splash/splash.css": "d4c329c6cb79131fd28c5c17aaf3287cb1b9aa0cf58797138abc724f96fc9095",
+    "app/src/main/assets/www/splash/splash.js": "00945c6e6acfd7229e5ffdb8515c12ac3d3d57940b7d0b4146222e9df394f7a9",
+    "app/src/main/assets/www/splash/logo.png": "4284fd581331f1d82635c537eec9576a04c4d222716e2a3c1bf70be7bddf8bdb",
+    "app/src/main/java/tj/faberlic/forever/MainActivity.java": "89ca016eb309a888489e4947c3f91c574459947d5e7f2063685c7ef248bbff76",
+    "app/src/main/java/tj/faberlic/forever/StartupSplashController.java": "0fb77df2f3a0add9780cbb8ad783c41ce913bdb6813d93abb6e47bc51532a67a",
+    "app/src/main/res/values-v31/themes.xml": "8a54d180a116bf257963c4f21ba3c9d04c4fac8f167f32939c29f068dee4f1fa",
+    "app/src/main/AndroidManifest.xml": "d38234ab0186b5305bf7fe0d75f2378b1fb377496e29e7dc9dba7b802687391d",
+    "app/build.gradle": "48d4e56bc5cd3f6a4397cb4f77611cd3fa7a4ae188bc387769995129ba42f5a1",
+    "build.gradle": "349c0b61699db149b402f31f53f110db53c87e918e6a723db24466ddf0c95973",
+    "app/src/main/assets/www/player/index.html": "f96cba2d3fa829419749ff1f2ed33f7904ad77d82d00591c36b081dc3d40bd31"
+  },
+  "notes": "Current user-supplied splash-preview(3).zip replaces all earlier active splash versions; Categories/Live introduction text removed RU/TJ/UZ; Materials introduction retained. | Explicit new read-only Firebase adapter; base screens and splash checksums unchanged. Two integration references: index.html script + MainActivity bridge. | v0.9.1-sync02: ONLY diagnostics/retry for read-only Firebase lessons module and versionCode 2 for installation identification. | SYNC03: only category module navigation fixed (all normal categories remain within Categories and list filtered lessons); Android versionCode=3. No changes to core navigation, Firebase bridge or other UI. | SYNC04: only MainActivity.java (HTTPS asset origin), modules/lesson.js (Referrer-Policy) and app/build.gradle (AndroidX Webkit; versionCode 4). Other application files remain frozen. | SYNC04: only MainActivity.java, modules/lesson.js and app/build.gradle changed; new assets/www/player/index.html. Frozen modules unchanged, file URL origin preserved. | SYNC05: only Android player fullscreen callback, nested iframe allow, lesson favorite heart icon, watched removed; covers remain unchanged pending user approval. | Activity handles orientation/config change locally while YouTube fullscreen so a phone rotation does not automatically recreate WebView. | SYNC-06: thumbnails dynamically read from YouTube by verified 11-character ID; no Firebase images, no questions feature, no changes to player or splash. | CMS-07: Android categories-cms.js new nested directory, published taxonomy bridge, custom thumbnail data, version code 7. App splash, player, language navigation and favorites unchanged. | v0.9.7: user-requested top-right favorite moved to lesson header, acid lime fills only the heart path; external button background unchanged. Approved changes: index.html, styles.css, app/build.gradle (version only). | CMS10: add published live/material links through isolated modules and new Firestore listeners; external fullscreen control below YouTube video, native external browser for HTTPS documents. Regenerate authorized hashes and preserve unchanged modules."
+}

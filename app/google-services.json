@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "108131219456",
+    "project_id": "faberlic-forever",
+    "storage_bucket": "faberlic-forever.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108131219456:android:0ce66300093ce08e3d00e5",
+        "android_client_info": {
+          "package_name": "tj.faberlic.forever"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArVpPVA20VwZXdYPkTKeEOgnlB0hAn-uE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,62 @@
+{
+  "environment": "Full app WebView assets in headless Edge, fake Android bridge, all external requests blocked; not native APK/device testing",
+  "results": [
+    {
+      "name": "Startup, categories and legacy nested topic binding",
+      "result": "PASS"
+    },
+    {
+      "name": "Hide removes category, home chips, banners and favorite display without deleting favorite IDs",
+      "result": "PASS"
+    },
+    {
+      "name": "Open restores video and favorite without a new lesson snapshot",
+      "result": "PASS"
+    },
+    {
+      "name": "Maintenance shows full message, disables entry and blocks direct openVideo",
+      "result": "PASS"
+    },
+    {
+      "name": "RU TJ UZ maintenance labels fit the mobile card",
+      "result": "PASS"
+    },
+    {
+      "name": "Close while lesson is open stops playback and returns from directory",
+      "result": "PASS"
+    },
+    {
+      "name": "Parent hiding blocks legacy child lesson through every entry point",
+      "result": "PASS"
+    },
+    {
+      "name": "Closed child remains visible inside open parent even with no available videos",
+      "result": "PASS"
+    },
+    {
+      "name": "Reopening parent preserves independently closed child",
+      "result": "PASS"
+    },
+    {
+      "name": "Original Soon and empty active category retain old behavior",
+      "result": "PASS"
+    },
+    {
+      "name": "Deletion including empty catalog takes effect; no root fallback for missing leaf",
+      "result": "PASS"
+    },
+    {
+      "name": "Malformed catalog/cycle cannot reopen a closed category",
+      "result": "PASS"
+    },
+    {
+      "name": "All five tabs, languages and lesson player still work",
+      "result": "PASS"
+    },
+    {
+      "name": "No unexpected JavaScript exceptions",
+      "result": "PASS"
+    }
+  ],
+  "errors": []
+}

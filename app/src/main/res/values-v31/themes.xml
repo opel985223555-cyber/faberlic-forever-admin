@@ -1,0 +1,14 @@
+<resources>
+    <style name="Theme.FaberlicForever" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/app_bg</item>
+        <item name="android:statusBarColor">@color/app_bg</item>
+        <item name="android:navigationBarColor">@color/app_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowSplashScreenBackground">@color/app_bg</item>
+        <!-- Android 12+: invisible system splash icon; the animated F appears only in our isolated WebView splash. -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_empty_icon</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/app_bg</item>
+    </style>
+</resources>

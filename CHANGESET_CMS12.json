@@ -1,0 +1,45 @@
+{
+  "release": "Android CMS-12 category availability",
+  "baseline": "Faberlic_Forever_Android_CMS10_CONTENT_FULLSCREEN (1).zip",
+  "changed_existing_files": [
+    "app/build.gradle",
+    "app/src/main/assets/www/index.html",
+    "app/src/main/assets/www/modules/categories-cms.js",
+    "app/src/main/assets/www/modules/categories.css",
+    "app/src/main/assets/www/modules/firebase-lessons.js",
+    "app/src/main/assets/www/modules/lesson.js"
+  ],
+  "added_files": [
+    "README_CMS12_RU.md",
+    "tests/CMS12_ANDROID_BROWSER_RESULTS.json",
+    "tests/test_cms12_availability.cjs",
+    "app/src/main/assets/www/core/category-availability.js",
+    "CHANGESET_CMS12.json"
+  ],
+  "deleted_files": [],
+  "verification": {
+    "full_interface_browser": "14/14 PASS, fake Android bridge, external requests blocked",
+    "admin_android_contract": "48 mode/language combinations identical",
+    "syntax": "17 JS/CJS passed",
+    "content_cms10": "PASS",
+    "player153_source": "PASS",
+    "frozen_modules": "PASS with six authorized exceptions",
+    "native_java_player_base_styles": "byte identical to original ZIP",
+    "apk_build": "NOT RUN",
+    "android_device": "NOT RUN",
+    "production_firebase": "NOT USED",
+    "python_visual_player_test": "NOT RUN: Python playwright not installed"
+  },
+  "sha256": {
+    "README_CMS12_RU.md": "f55719353caaece4b77e9fcfd4cd3877d1c062f421090d4cccda4f4314a26b16",
+    "app/build.gradle": "18cd586d79ae0d07f96bdeac2028f6844835aa3bb235a7d2471924e1b793718d",
+    "tests/CMS12_ANDROID_BROWSER_RESULTS.json": "c5c482e4de9966f77ebf881cd4aa3181b580a1d8ad91e8ba1673385240cb9524",
+    "tests/test_cms12_availability.cjs": "0d01d115573e68bca81aabd6b654de1c28beb6239b68fd6f7fad7453312e2128",
+    "app/src/main/assets/www/index.html": "b5862d3b7966e3c36e227ffa3ff3bd82f06b42ade3e77d58e5fe9cebd65e3ad5",
+    "app/src/main/assets/www/core/category-availability.js": "5dd8ceebd3b8f38afe45ef21f08fd0a52f4e5b812af8e7eb19143aab0b980973",
+    "app/src/main/assets/www/modules/categories-cms.js": "ac4d5a6d1078b77b68453cf94ccb78812468a12a6f769711840346161cd171c2",
+    "app/src/main/assets/www/modules/categories.css": "fc0ad2517c5c32e859be45991c04f4e0357ffc270ccb5a37e3bc3746e0bed20d",
+    "app/src/main/assets/www/modules/firebase-lessons.js": "3bdd3f24af7972f4fdf3f712fa61e479b3c388d65b99b02690f351478a1cc466",
+    "app/src/main/assets/www/modules/lesson.js": "f92abc474c84eff140e3cb2b570287f35eadfaa2efa766611aa66cae63314c09"
+  }
+}
