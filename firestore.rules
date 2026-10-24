@@ -18,6 +18,14 @@ service cloud.firestore {
    let p = /databases/$(database)/documents/lessonOrderScopes/$(id);
    return getAfter(p).data.revision == (exists(p) ? get(p).data.revision : 0) + 1;
   }
+  function membershipAdvanced() {
+   let p = /databases/$(database)/documents/catalogGuards/membership;
+   return getAfter(p).data.revision == (exists(p) ? get(p).data.revision : 0) + 1;
+  }
+  function catalogLink(d) {
+   let p = /databases/$(database)/documents/taxonomy/catalog;
+   return getAfter(p).data.roots[d.leafCategoryId] == d.categoryId;
+  }
   function validScope(d) {
    return d.keys().hasAll(['leafCategoryId','language','revision','updatedAt'])
     && d.keys().hasOnly(['leafCategoryId','language','revision','updatedAt'])
@@ -57,6 +65,7 @@ service cloud.firestore {
   match /lessons/{lessonId} {
    allow get, list: if isAdmin() || resource.data.status == 'published';
    allow create: if isAdmin() && validLesson(request.resource.data)
+    && membershipAdvanced() && catalogLink(request.resource.data)
     && request.resource.data.revision == 1
     && request.resource.data.clientRequestId == lessonId
     && request.resource.data.createdAt == request.time
@@ -66,6 +75,8 @@ service cloud.firestore {
     && request.resource.data.get('createdAt',null) == resource.data.get('createdAt',null)
     && request.resource.data.get('clientRequestId',null) == resource.data.get('clientRequestId',null)
     && linkedScope(request.resource.data)
+    && ((leaf(resource.data) == leaf(request.resource.data) && resource.data.categoryId == request.resource.data.categoryId)
+        || (membershipAdvanced() && catalogLink(request.resource.data)))
     && (scopeId(resource.data) == scopeId(request.resource.data) || advanced(scopeId(resource.data)));
    allow delete: if isAdmin() && advanced(scopeId(resource.data));
   }
@@ -80,15 +91,20 @@ service cloud.firestore {
     && request.resource.data.revision == resource.data.revision + 1;
    allow delete: if false;
   }
+  match /catalogGuards/{id} {
+   allow read: if isAdmin();
+   allow create, update: if id == 'membership' && isAdmin()
+    && request.resource.data.keys().hasOnly(['revision','updatedAt'])
+    && request.resource.data.revision is int
+    && request.resource.data.revision > 0
+    && request.resource.data.revision == (exists(/databases/$(database)/documents/catalogGuards/$(id)) ? resource.data.revision : 0) + 1
+    && request.resource.data.updatedAt == request.time;
+   allow delete: if false;
+  }
   match /taxonomy/{docId} {
    allow get: if docId == 'catalog';
-   allow list, delete: if false;
-   allow create: if docId == 'catalog' && isAdmin() && validCatalog(request.resource.data)
-    && request.resource.data.revision == 1;
-   allow update: if docId == 'catalog' && isAdmin() && validCatalog(request.resource.data)
-    && resource.data.items is list
-    && request.resource.data.items.size() >= resource.data.items.size()
-    && request.resource.data.revision == resource.data.get('revision',0) + 1;
+   // CMS-11: validated callable owns all structural writes (Admin SDK).
+   allow list, create, update, delete: if false;
   }
   // CMS10 independent live streams. Only published records can be queried by Android.
   function validStream(d) {

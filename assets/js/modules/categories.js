@@ -30,7 +30,7 @@
    const ordered=[];const visited=new Set();function visit(parent,depth=0){if(depth>20)return;for(const x of children(parent)){if(visited.has(x.id))continue;visited.add(x.id);ordered.push({...x,_depth:depth});visit(x.id,depth+1);}}visit(null);
    holder.innerHTML=ordered.map(x=>{let status=x.status==='soon'?'Скоро':x.status==='hidden'?'Скрыт':'Открыт';
      if(x.status==='active'&&!published(x.id))status='Скоро · нет опубликованных уроков';
-     return `<div class="catalog-item" style="gap:12px;padding-left:${Math.min(x._depth,6)*16}px"><div class="number-icon">${x.parentId?'↳':'▦'}</div><div><strong>${A.escape(breadcrumb(x.id))}</strong><small>${A.escape(x.description?.ru||'Без описания')} · ${status}</small></div><button type="button" class="small-button" data-category-edit="${A.escape(x.id)}">Изменить</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="-1" aria-label="Выше">↑</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="1" aria-label="Ниже">↓</button></div>`;}).join('');
+     return `<div class="catalog-item" style="gap:12px;padding-left:${Math.min(x._depth,6)*16}px"><div class="number-icon">${x.parentId?'↳':'▦'}</div><div><strong>${A.escape(breadcrumb(x.id))}</strong><small>${A.escape(x.description?.ru||'Без описания')} · ${status}</small></div><button type="button" class="small-button" data-category-edit="${A.escape(x.id)}">Изменить</button><button type="button" class="small-button" data-category-delete="${A.escape(x.id)}">Удалить</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="-1" aria-label="Выше">↑</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="1" aria-label="Ниже">↓</button></div>`;}).join('');
    A.modules.videos?.refreshCategoryOptions?.();
  }
  const normalize=(all,parentId)=>{const rows=all.filter(x=>(x.parentId||null)===(parentId||null)).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||a.id.localeCompare(b.id));rows.forEach((x,i)=>{x.order=i+1;});};
@@ -56,9 +56,21 @@
    const all=items().map(x=>structuredClone(x));const ids=siblings.map(x=>x.id);[ids[index],ids[index+delta]]=[ids[index+delta],ids[index]];ids.forEach((id,i)=>all.find(x=>x.id===id).order=i+1);
    A.state.busy=true;try{await A.repo.saveCatalog(all);await A.refreshAll();A.notify('Порядок разделов сохранён');}catch(err){A.notify('Не удалось изменить порядок: '+err.message,'error');}finally{A.state.busy=false;}
  }
+ async function remove(id){
+   if(A.state.busy)return;const x=node(id);if(!x)return;
+   if(populated(id)||A.state.lessons.some(v=>v.categoryId===id)){A.notify('Нельзя удалить категорию «'+label(id)+'»: в ней есть видео. Сначала перенесите или удалите видео вручную.','error');return;}
+   if(children(id).length){A.notify('Нельзя удалить категорию «'+label(id)+'»: в ней есть вложенные категории. Сначала перенесите или удалите их.','error');return;}
+   if(!window.confirm('Удалить категорию «'+label(id)+'»? Это действие нельзя отменить.'))return;
+   const fresh=items().filter(v=>v.id!==id).map(v=>structuredClone(v));normalize(fresh,x.parentId);
+   A.state.busy=true;
+   try{await A.repo.saveCatalog(fresh,A.state.catalogRevision);if(A.$('#category-edit-id').value===id)clear();
+     try{await A.refreshAll();A.notify('Категория удалена');}catch(err){A.notify('Категория удалена, но список не обновлён. Обновите страницу: '+err.message,'error');}
+   }catch(err){A.notify('Не удалось удалить категорию: '+err.message,'error');try{await A.refreshAll();}catch{/* Existing load error blocks further mutations. */}}
+   finally{A.state.busy=false;}
+ }
  function init(){A.$on(A.$('#category-form'),'submit',save);A.$on(A.$('#category-new'),'click',clear);
    A.$on(A.$('#catalog-init'),'click',async()=>{if(A.state.busy)return;A.state.busy=true;A.$('#catalog-init').disabled=true;try{await ensure();A.notify('Структура категорий опубликована');}catch(e){A.notify('Не удалось опубликовать структуру. Проверь правила Firestore: '+e.message,'error');}finally{A.state.busy=false;A.$('#catalog-init').disabled=false;}});
-   A.$on(A.$('#categories-list'),'click',e=>{const b=e.target.closest('[data-category-edit],[data-category-shift]');if(!b)return;if(b.dataset.categoryEdit)edit(b.dataset.categoryEdit);else if(b.dataset.categoryShift)shift(b.dataset.categoryShift,Number(b.dataset.step));});
+   A.$on(A.$('#categories-list'),'click',e=>{const b=e.target.closest('[data-category-edit],[data-category-shift],[data-category-delete]');if(!b||A.state.busy)return;if(b.dataset.categoryDelete)remove(b.dataset.categoryDelete);else if(b.dataset.categoryEdit)edit(b.dataset.categoryEdit);else if(b.dataset.categoryShift)shift(b.dataset.categoryShift,Number(b.dataset.step));});
  }
  A.catalog={items,node,children,label,ancestor,isChild,breadcrumb,selectHTML,seed};A.modules.categories={init,render};
 })();

@@ -1,0 +1,21 @@
+{
+  "projectId": "demo-ff-cms11",
+  "environment": "Local Firestore emulator only",
+  "passed": 14,
+  "results": [
+    "Delete old empty category; preserve metadata and translations",
+    "Create then delete new empty category",
+    "Any language, draft/published and legacy video blocks deletion",
+    "Parent deletion, orphan and cycle rejected; child can be deleted",
+    "Nested video bindings preserved; populated subtree cannot move",
+    "Legacy topic binding blocks deletion",
+    "Stale revision and repeat deletion rejected",
+    "Concurrent category editors: exactly one accepted",
+    "Unauthenticated and inactive callers denied",
+    "Direct catalog writes including shrink or same-size replacement denied",
+    "Lesson create + guard succeeds; missing guard and absent category denied",
+    "Actual firebase.js adapter: create/edit/reorder/move/delete with real rules",
+    "Deletion vs concurrent video create never produces orphan (12 races)",
+    "Public catalog/published reads preserved; drafts and admin guards hidden"
+  ]
+}
