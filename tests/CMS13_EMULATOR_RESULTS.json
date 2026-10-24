@@ -1,0 +1,73 @@
+{
+  "environment": "Local Firestore emulator, actual client SDK, no Cloud Functions",
+  "results": [
+    {
+      "name": "Legacy inventory bootstrap on Spark preserves lessons, metadata and translations",
+      "result": "PASS"
+    },
+    {
+      "name": "Hide/maintenance/open work directly without functions and preserve videos",
+      "result": "PASS"
+    },
+    {
+      "name": "Delete old empty and newly added empty category",
+      "result": "PASS"
+    },
+    {
+      "name": "All languages and draft/published lessons block deletion",
+      "result": "PASS"
+    },
+    {
+      "name": "Parent/child deletion, cycle and populated subtree reparent protection",
+      "result": "PASS"
+    },
+    {
+      "name": "Two stale category editors and repeat delete reject safely",
+      "result": "PASS"
+    },
+    {
+      "name": "Actual lesson create/edit/reorder/move/delete maintain category counters",
+      "result": "PASS"
+    },
+    {
+      "name": "Legacy lesson first edit and delete with fresh counter migration",
+      "result": "PASS"
+    },
+    {
+      "name": "Category reorder and empty subtree reparent still work",
+      "result": "PASS"
+    },
+    {
+      "name": "Create/delete race cannot orphan a video (8 actual SDK races)",
+      "result": "PASS"
+    },
+    {
+      "name": "Depth 20 category counter transaction stays within rules limits",
+      "result": "PASS"
+    },
+    {
+      "name": "Direct shrinking, same-size ID substitution and counter reset denied",
+      "result": "PASS"
+    },
+    {
+      "name": "First launch without stored catalog creates seed and guarded index",
+      "result": "PASS"
+    },
+    {
+      "name": "Legacy topic binding indexed and blocks leaf deletion",
+      "result": "PASS"
+    },
+    {
+      "name": "Correctly formed raw delete of occupied category denied by rules",
+      "result": "PASS"
+    },
+    {
+      "name": "Concurrent move into deleting category preserves destination video binding",
+      "result": "PASS"
+    },
+    {
+      "name": "Nonadmin writes denied; published reads and live/material contracts preserved",
+      "result": "PASS"
+    }
+  ]
+}

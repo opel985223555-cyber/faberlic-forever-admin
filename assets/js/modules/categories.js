@@ -49,14 +49,14 @@
    const moved=Boolean(existing&&existing.parentId!==parent);
    const next=availability.apply({...existing,id:key,parentId:parent,name,description,order:moved||!existing?Math.max(0,...fresh.filter(x=>(x.parentId||null)===parent&&x.id!==key).map(x=>Number(x.order)||0))+1:existing.order},A.$('#category-status').value);
    const index=fresh.findIndex(x=>x.id===key);if(index>=0)fresh[index]=next;else fresh.push(next);
-   normalize(fresh,parent);if(moved)normalize(fresh,existing.parentId);
+
    try{A.dataGuard.catalog(fresh);}catch(err){A.notify(err.message,'error');return;}
    A.state.busy=true;A.$('#category-save').disabled=true;
    try{await A.repo.saveCatalog(fresh,editingRevision);clear();try{await A.refreshAll();A.notify('Раздел сохранён');}catch(err){A.notify('Раздел сохранён, но список не обновлён. Обновите страницу: '+err.message,'error');}}catch(err){A.notify('Ошибка сохранения раздела: '+err.message,'error');}
    finally{A.state.busy=false;A.$('#category-save').disabled=false;}
  }
  async function shift(id,delta){if(A.state.busy)return;const x=node(id);if(!x)return;const siblings=children(x.parentId),index=siblings.findIndex(r=>r.id===id),other=siblings[index+delta];if(!other)return;
-   const all=items().map(x=>structuredClone(x));const ids=siblings.map(x=>x.id);[ids[index],ids[index+delta]]=[ids[index+delta],ids[index]];ids.forEach((id,i)=>all.find(x=>x.id===id).order=i+1);
+   const all=items().map(x=>structuredClone(x));const left=all.find(v=>v.id===id),right=all.find(v=>v.id===other.id);const a=Number(left.order)||0,b=Number(right.order)||0;left.order=b;right.order=a;if(a===b){if(delta<0){left.order=Math.max(0,a-1);right.order=a+1;}else{left.order=a+1;right.order=Math.max(0,a-1);}}
    A.state.busy=true;try{await A.repo.saveCatalog(all);await A.refreshAll();A.notify('Порядок разделов сохранён');}catch(err){A.notify('Не удалось изменить порядок: '+err.message,'error');}finally{A.state.busy=false;}
  }
  async function changeAccess(id,value){
@@ -77,7 +77,7 @@
    if(populated(id)||A.state.lessons.some(v=>v.categoryId===id)){A.notify('Нельзя удалить категорию «'+label(id)+'»: в ней есть видео. Сначала перенесите или удалите видео вручную.','error');return;}
    if(children(id).length){A.notify('Нельзя удалить категорию «'+label(id)+'»: в ней есть вложенные категории. Сначала перенесите или удалите их.','error');return;}
    if(!window.confirm('Удалить категорию «'+label(id)+'»? Это действие нельзя отменить.'))return;
-   const fresh=items().filter(v=>v.id!==id).map(v=>structuredClone(v));normalize(fresh,x.parentId);
+   const fresh=items().filter(v=>v.id!==id).map(v=>structuredClone(v));
    A.state.busy=true;
    try{await A.repo.saveCatalog(fresh,A.state.catalogRevision);if(A.$('#category-edit-id').value===id)clear();
      try{await A.refreshAll();A.notify('Категория удалена');}catch(err){A.notify('Категория удалена, но список не обновлён. Обновите страницу: '+err.message,'error');}
