@@ -1,0 +1,42 @@
+/* Branding only. Do not change functional modules. */
+/* Gotham Pro is the approved font. For a licensed site-wide webfont,
+   add a properly licensed .woff2 here and update the @font-face source.
+   The font itself is not distributed in this public GitHub ZIP. */
+@font-face {
+  font-family: "GothamPro";
+  src: local("Gotham Pro"), local("GothamPro");
+  font-display: swap;
+  font-style: normal;
+}
+:root { --ff-font: "GothamPro", "Gotham Pro", "Avenir Next", "Montserrat", Arial, sans-serif; }
+html, body, button, input, select, textarea { font-family: var(--ff-font); }
+.brand-mark {
+  width: 104px;
+  height: 104px;
+  padding: 0;
+  border: 0;
+  border-radius: 24px;
+  box-shadow: none;
+  margin-bottom: 25px;
+  letter-spacing: normal;
+  overflow: hidden;
+  background: #090a0c;
+  display: block;
+}
+.brand-mark img, .mini-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mini-logo {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 0;
+  overflow: hidden;
+  display: block;
+  background: #090a0c;
+  letter-spacing: normal;
+}
+.sidebar-brand { gap: 12px; }
+@media(max-width:1050px) { .sidebar-brand { gap: 9px; } .mini-logo { width: 40px; min-width: 40px; height: 40px; } }

@@ -1,0 +1,276 @@
+let data=window.FF_DATA;
+let activeCategory='all',bannerIndex=0,currentVideoId=null,currentPage='home',bannerTimer=null;
+let currentLang=localStorage.getItem('ff_lang')||'ru';
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=(s='')=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const savedIds=()=>JSON.parse(localStorage.getItem('ff_saved')||'[]');
+const setSaved=arr=>localStorage.setItem('ff_saved',JSON.stringify(arr));
+
+const UI={
+ru:{
+ code:'RU',brand:'Обучение для команды',nav:{home:'Главная',categories:'Категории',live:'Эфиры',materials:'Материалы',saved:'Избранное'},
+ page:{categories:'Категории',live:'Эфиры',materials:'Материалы',saved:'Избранное'},
+ search:'Найти обучение...',all:'Все',continue:'Продолжить просмотр',history:'История',new:'Новинки',allNew:'Все',
+ continueMeta:'Урок 3 из 5 · осталось 8 мин',
+ sub:{categories:'Всё обучение разложено по понятным направлениям.',live:'Расписание живого обучения и записи прошедших эфиров.',materials:'Памятки, инструкции, презентации и чек-листы.',saved:'Сохранённые уроки будут собраны здесь.'},
+ lesson:'Урок',favorite:'В избранное',favoriteOn:'В избранном',watched:'✓ Пройдено',noSaved:'Пока ничего не сохранено.',saveHint:'Открой урок и нажми «В избранное».',
+ noVideo:'Видео на русском пока не подключено.',vertical:'Вертикальное 9:16',horizontal:'Горизонтальное 16:9',
+ watch:'Смотреть урок',languageTitle:'Язык приложения',languageSub:'Выберите язык',newBadge:'НОВОЕ'
+},
+tj:{
+ code:'TJ',brand:'Омӯзиш барои команда',nav:{home:'Асосӣ',categories:'Категорияҳо',live:'Эфирҳо',materials:'Материалҳо',saved:'Интихобшуда'},
+ page:{categories:'Категорияҳо',live:'Эфирҳо',materials:'Материалҳо',saved:'Интихобшуда'},
+ search:'Дарсро ёбед...',all:'Ҳама',continue:'Давом диҳед',history:'Тамошоҳо',new:'Навҳо',allNew:'Ҳама',
+ continueMeta:'Дарси 3 аз 5 · 8 дақиқа мондааст',
+ sub:{categories:'Ҳамаи дарсҳо аз рӯи мавзӯъҳо ҷудо шудаанд.',live:'Эфирҳои наздик ва сабти эфирҳои гузашта.',materials:'Ёддоштҳо, дастурҳо, презентатсияҳо ва чек-листҳо.',saved:'Дарсҳои нигоҳдоштаатон дар ҳамин ҷо мешаванд.'},
+ lesson:'Дарс',favorite:'Ба интихобшудаҳо',favoriteOn:'Дар интихобшудаҳо',watched:'✓ Дида шуд',noSaved:'Ҳоло ягон дарс нигоҳ надоштаед.',saveHint:'Дарсро кушоед ва «Ба интихобшудаҳо»-ро пахш кунед.',
+ noVideo:'Видео ба тоҷикӣ ҳоло пайваст нашудааст.',vertical:'Вертикалӣ 9:16',horizontal:'Горизонталӣ 16:9',
+ watch:'Дарсро бинед',languageTitle:'Забони барнома',languageSub:'Забонро интихоб кунед',newBadge:'НАВ'
+},
+uz:{
+ code:'UZ',brand:'Команда учун ўқув',nav:{home:'Асосий',categories:'Категориялар',live:'Эфирлар',materials:'Материаллар',saved:'Танланганлар'},
+ page:{categories:'Категориялар',live:'Эфирлар',materials:'Материаллар',saved:'Танланганлар'},
+ search:'Дарсни топинг...',all:'Ҳаммаси',continue:'Давом эттириш',history:'Кўрилганлар',new:'Янгилар',allNew:'Ҳаммаси',
+ continueMeta:'5 та дарсдан 3-си · 8 дақиқа қолди',
+ sub:{categories:'Барча дарслар мавзу бўйича ажратилган.',live:'Яқин эфирлар ва ўтган эфир ёзувлари.',materials:'Эслатмалар, қўлланмалар, презентациялар ва чек-листлар.',saved:'Сақланган дарслар шу ерда туради.'},
+ lesson:'Дарс',favorite:'Танланганларга',favoriteOn:'Танланганларда',watched:'✓ Кўрилди',noSaved:'Ҳозирча ҳеч нарса сақланмаган.',saveHint:'Дарсни очиб, «Танланганларга»ни босинг.',
+ noVideo:'Ўзбекча видео ҳозирча уланмаган.',vertical:'Вертикал 9:16',horizontal:'Горизонтал 16:9',
+ watch:'Дарсни кўриш',languageTitle:'Илова тили',languageSub:'Тилни танланг',newBadge:'ЯНГИ'
+}
+};
+
+const CONTENT={
+ categories:{
+  newbie:{ru:['Новичку','Первые шаги в Faberlic'],tj:['Барои навкор','Қадамҳои аввал дар Faberlic'],uz:['Янги бошловчига','Faberlicда биринчи қадамлар']},
+  sales:{ru:['Продажи','Как продавать больше'],tj:['Фурӯш','Чӣ хел бештар фурӯшем'],uz:['Сотув','Кўпроқ сотиш йўллари']},
+  recruit:{ru:['Рекрутинг','Приглашение и команда'],tj:['Даъват','Чӣ хел одам даъват кунем'],uz:['Таклиф қилиш','Одам таклиф қилиш ва команда']},
+  product:{ru:['Продукция','Обзоры и рекомендации'],tj:['Маҳсулот','Шарҳ ва тавсияҳо'],uz:['Маҳсулот','Шарҳ ва тавсиялар']},
+  health:{ru:['Здоровье','БАДы и wellness'],tj:['Саломатӣ','БАД ва маҳсулоти саломатӣ'],uz:['Саломатлик','БАД ва саломатлик маҳсулотлари']},
+  cabinet:{ru:['Личный кабинет','Заказы, оплата, инструменты'],tj:['Кабинети шахсӣ','Заказ, пардохт ва асбобҳо'],uz:['Шахсий кабинет','Буюртма, тўлов ва воситалар']},
+  motivation:{ru:['Мотивация','Истории и цели'],tj:['Мотивация','Ҳикояҳо ва мақсадҳо'],uz:['Мотивация','Ҳикоялар ва мақсадлар']},
+  team:{ru:['Работа с командой','Рост и сопровождение'],tj:['Кор бо команда','Рушд ва дастгирии команда'],uz:['Команда билан ишлаш','Ўсиш ва командани қўллаб-қувватлаш']}
+ },
+ videos:{
+  v1:{ru:['Быстрый старт в Faberlic','Тестовый урок. Реальное видео и описание добавим после подключения материалов.'],tj:['Старти тез дар Faberlic','Дарси тестӣ. Баъд видеои ҳақиқӣ ва маълумотро мегузорем.'],uz:['Faberlicда тез старт','Тест дарси. Кейин ҳақиқий видео ва маълумотни қўшамиз.']},
+  v2:{ru:['Как приглашать без давления','Тестовый вертикальный урок 9:16 для проверки отображения на телефоне.'],tj:['Чӣ хел бе маҷбуркунӣ даъват кунем','Дарси тестии вертикалӣ 9:16 барои санҷиш дар телефон.'],uz:['Босимсиз қандай таклиф қилиш','Телефонда текшириш учун 9:16 вертикал тест дарси.']},
+  v3:{ru:['Как работать с клиентом','Страница урока уже умеет менять формат плеера под вертикальное видео.'],tj:['Чӣ хел бо клиент кор кунем','Саҳифаи дарс формати видеоро худ мувофиқ мекунад.'],uz:['Мижоз билан қандай ишлаш','Дарс саҳифаси видео форматига автоматик мослашади.']},
+  v4:{ru:['Как презентовать продукт','Пример горизонтального урока 16:9.'],tj:['Чӣ хел маҳсулотро нишон диҳем','Намунаи дарси горизонталӣ 16:9.'],uz:['Маҳсулотни қандай таништириш','16:9 горизонтал дарс намунаси.']},
+  v5:{ru:['Первые действия в личном кабинете','Тестовый урок по личному кабинету.'],tj:['Қадамҳои аввал дар кабинети шахсӣ','Дарси тестӣ дар бораи кабинети шахсӣ.'],uz:['Шахсий кабинетда биринчи қадамлар','Шахсий кабинет бўйича тест дарси.']},
+  v6:{ru:['Работа с командой: первые 30 дней','Тестовый командный урок.'],tj:['Кор бо команда: 30 рӯзи аввал','Дарси тестӣ барои кор бо команда.'],uz:['Команда билан ишлаш: биринчи 30 кун','Команда билан ишлаш бўйича тест дарси.']}
+ },
+ banners:{
+  b1:{ru:['НОВОЕ ОБУЧЕНИЕ','Как быстро включить новичка в работу','Первые действия, контакт и сопровождение без перегруза.'],tj:['ДАРСИ НАВ','Чӣ хел навкорро тез ба кор дарорем','Қадамҳои аввал, алоқа ва дастгирӣ — сода ва бе душворӣ.'],uz:['ЯНГИ ДАРС','Янги одамни ишга тез киритиш','Биринчи қадамлар, алоқа ва қўллаб-қувватлаш — оддий тарзда.']},
+  b2:{ru:['ВАЖНО','Система работы с клиентом','Короткая схема, которую удобно повторять каждый день.'],tj:['МУҲИМ','Системаи кор бо клиент','Схемаи кӯтоҳе, ки ҳар рӯз истифода бурдан осон аст.'],uz:['МУҲИМ','Мижоз билан ишлаш системаси','Ҳар куни ишлатиш осон бўлган қисқа схема.']},
+  b3:{ru:['ЭФИР','Командное обучение','Расписание и записи будут доступны в разделе «Эфиры».'],tj:['ЭФИР','Омӯзиши команда','Ҷадвал ва сабтҳо дар қисми «Эфирҳо» мешаванд.'],uz:['ЭФИР','Команда ўқуви','Жадвал ва ёзувлар «Эфирлар» бўлимида бўлади.']}
+ },
+ live:{
+  l1:{ru:['Разбор каталога','Расписание добавим позже'],tj:['Разбори каталог','Ҷадвалро баъд мегузорем'],uz:['Каталог таҳлили','Жадвални кейин қўшамиз']},
+  l2:{ru:['Работа с новичком','Запись эфира'],tj:['Кор бо навкор','Сабти эфир'],uz:['Янги одам билан ишлаш','Эфир ёзуви']},
+  l3:{ru:['Командный эфир','Запись эфира'],tj:['Эфири команда','Сабти эфир'],uz:['Команда эфири','Эфир ёзуви']}
+ },
+ materials:{
+  m1:{ru:['Чек-лист новичка','Тестовый материал'],tj:['Чек-лист барои навкор','Материали тестӣ'],uz:['Янги одам учун чек-лист','Тест материали']},
+  m2:{ru:['Презентация возможностей','Тестовый материал'],tj:['Презентатсияи имкониятҳо','Материали тестӣ'],uz:['Имкониятлар презентацияси','Тест материали']},
+  m3:{ru:['Скрипты приглашений','Тестовый материал'],tj:['Матни тайёр барои даъват','Материали тестӣ'],uz:['Таклиф учун тайёр матнлар','Тест материали']}
+ }
+};
+
+function t(){return UI[currentLang]||UI.ru}
+function content(section,id,index=0){
+ const row=CONTENT[section]?.[id]?.[currentLang]||CONTENT[section]?.[id]?.ru;
+ return row?.[index]||'';
+}
+function catName(id){return content('categories',id,0)||id}
+function videoTitle(id){return content('videos',id,0)||data.videos.find(v=>v.id===id)?.title||id}
+function videoDesc(id){return content('videos',id,1)||data.videos.find(v=>v.id===id)?.description||''}
+
+function lockViewport(){document.documentElement.style.setProperty('--app-height',`${window.innerHeight}px`)}
+
+function svgIcon(name){
+ const icons={
+  spark:'<svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>',
+  bars:'<svg viewBox="0 0 24 24"><rect x="4" y="14" width="3" height="6" rx="1"/><rect x="10.5" y="9" width="3" height="11" rx="1"/><rect x="17" y="4" width="3" height="16" rx="1"/></svg>',
+  users:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.4"/><path d="M3.5 19c.5-4 2.8-6 5.5-6s5 2 5.5 6zM14 18.8c.4-2.8 1.8-4.4 4-4.4 1.4 0 2.4.7 3 2"/></svg>',
+  diamond:'<svg viewBox="0 0 24 24"><path d="M5 5h14l3 5-10 11L2 10z"/><path d="M7.8 5 12 21 16.2 5M2.5 10h19" class="cut"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20.5S3.5 15.8 3.5 9.8c0-3.3 4.1-5.1 8.5-.8 4.4-4.3 8.5-2.5 8.5.8 0 6-8.5 10.7-8.5 10.7z"/></svg>',
+  screen:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><rect x="9" y="19" width="6" height="2" rx="1"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24"><path d="M8 4h8v5c0 3-1.8 5-4 5s-4-2-4-5zM10 14h4v4h3v2H7v-2h3z"/><path d="M8 6H4c0 3 1 5 4 5M16 6h4c0 3-1 5-4 5" class="cut"/></svg>',
+  team:'<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 19c.5-4 2.8-6 5.5-6s5 2 5.5 6M10.5 19c.5-4 2.8-6 5.5-6s5 2 5.5 6"/></svg>'
+ }; return icons[name]||icons.spark;
+}
+
+function getActiveBanners(){return data.banners.filter(b=>b.active)}
+function changeBanner(step){
+ const arr=getActiveBanners(); if(arr.length<2)return;
+ bannerIndex=(bannerIndex+step+arr.length)%arr.length; renderBanners(); restartBannerTimer()
+}
+function restartBannerTimer(){
+ clearInterval(bannerTimer); const arr=getActiveBanners();
+ if(arr.length>1)bannerTimer=setInterval(()=>changeBanner(1),3800)
+}
+function renderBanners(){
+ const arr=getActiveBanners(),wrap=$('#heroWrap');
+ if(!arr.length){wrap.innerHTML='';return}
+ bannerIndex=Math.min(bannerIndex,arr.length-1);
+ const b=arr[bannerIndex],text=CONTENT.banners[b.id]?.[currentLang]||CONTENT.banners[b.id]?.ru||[b.label,b.title,b.text];
+ wrap.innerHTML=`
+ <div class="hero" id="heroBox">
+   ${arr.length>1?'<button class="bannerArrow" aria-label="Следующий баннер" onclick="event.stopPropagation();changeBanner(1)"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>':''}
+   <span class="badge">${esc(text[0])}</span>
+   <h1>${esc(text[1])}</h1>
+   <p>${esc(text[2])}</p>
+   <button class="cta" onclick="openVideo('${b.videoId}')">
+     <span>${esc(t().watch)}</span>
+     <svg viewBox="0 0 24 24"><path d="M9 5.5 15.5 12 9 18.5"/></svg>
+   </button>
+ </div>
+ <div class="dots">${arr.map((_,i)=>`<button class="dot ${i===bannerIndex?'active':''}" onclick="bannerIndex=${i};renderBanners();restartBannerTimer()"></button>`).join('')}</div>`;
+ bindBannerSwipe()
+}
+function bindBannerSwipe(){
+ const hero=$('#heroBox'); if(!hero)return; let sx=0,sy=0;
+ hero.addEventListener('touchstart',e=>{const p=e.changedTouches[0];sx=p.clientX;sy=p.clientY},{passive:true});
+ hero.addEventListener('touchend',e=>{const p=e.changedTouches[0],dx=p.clientX-sx,dy=p.clientY-sy;if(Math.abs(dx)>42&&Math.abs(dx)>Math.abs(dy))changeBanner(dx<0?1:-1)},{passive:true})
+}
+
+function renderChips(){
+ $('#chips').innerHTML=`<button class="chip ${activeCategory==='all'?'active':''}" onclick="setCat('all')">${esc(t().all)}</button>`+
+ data.categories.slice(0,6).map(c=>`<button class="chip ${activeCategory===c.id?'active':''}" onclick="setCat('${c.id}')">${esc(catName(c.id))}</button>`).join('')
+}
+function setCat(id){activeCategory=id;renderChips();renderVideos()}
+function renderVideos(){
+ const q=($('#search')?.value||'').toLowerCase().trim();
+ const arr=data.videos.filter(v=>{
+   const title=videoTitle(v.id).toLowerCase(),cat=catName(v.category).toLowerCase();
+   return (activeCategory==='all'||v.category===activeCategory)&&(!q||title.includes(q)||cat.includes(q))
+ }).slice(0,8);
+ $('#videoGrid').innerHTML=arr.map(v=>`
+ <article class="videoCard" onclick="openVideo('${v.id}')">
+   <div class="cover">${v.isNew?`<span class="new">${esc(t().newBadge)}</span>`:''}<span class="playmini">▶</span><span class="time">${esc(v.duration)}</span></div>
+   <div class="videoInfo"><span class="kicker">${esc(catName(v.category))}</span><b>${esc(videoTitle(v.id))}</b><small>${v.orientation==='vertical'?esc(t().vertical):esc(t().horizontal)}</small></div>
+ </article>`).join('')||`<div class="empty">${esc(t().noSaved)}</div>`
+}
+function renderCategories(){
+ const target=$('#categoryList'); if(!target)return;
+ target.innerHTML=data.categories.map(c=>`
+ <button class="item" onclick="openCategory('${c.id}')">
+   <div class="itemIcon">${svgIcon(c.icon)}</div>
+   <div><b>${esc(catName(c.id))}</b><small>${esc(content('categories',c.id,1))}</small></div>
+   <span class="arrow">›</span>
+ </button>`).join('')
+}
+function openCategory(id){activeCategory=id;go('home');renderChips();renderVideos();setTimeout(()=>document.querySelector('.chips')?.scrollIntoView({behavior:'smooth',block:'center'}),80)}
+function renderLive(){
+ const target=$('#liveList'); if(!target)return;
+ target.innerHTML=data.live.map(x=>`<div class="item"><div class="itemIcon">LIVE</div><div><b>${esc(content('live',x.id,0))}</b><small>${esc(content('live',x.id,1))}</small></div><span class="arrow">→</span></div>`).join('')
+}
+function renderMaterials(){
+ const target=$('#materialList'); if(!target)return;
+ target.innerHTML=data.materials.map(x=>`<div class="item"><div class="itemIcon">${esc(x.type)}</div><div><b>${esc(content('materials',x.id,0))}</b><small>${esc(content('materials',x.id,1))}</small></div><span class="arrow">↓</span></div>`).join('')
+}
+function renderSaved(){
+ const target=$('#savedList'); if(!target)return;
+ const ids=savedIds(),arr=data.videos.filter(v=>ids.includes(v.id));
+ target.innerHTML=arr.length?`<div class="list">${arr.map(v=>`<button class="item" onclick="openVideo('${v.id}')"><div class="itemIcon">▶</div><div><b>${esc(videoTitle(v.id))}</b><small>${esc(catName(v.category))} · ${esc(v.duration)}</small></div><span class="arrow">›</span></button>`).join('')}</div>`:
+ `<div class="empty"><b>${esc(t().noSaved)}</b><br>${esc(t().saveHint)}</div>`
+}
+
+function updateStaticUI(){
+ document.documentElement.lang=currentLang==='tj'?'tg':currentLang;
+ $('#brandSubtitle').textContent=t().brand;
+ $('#search').placeholder=t().search;
+ $('#continueTitle').textContent=t().continue;
+ $('#historyBtn').textContent=t().history;
+ $('#newTitle').textContent=t().new;
+ $('#allNewBtn').textContent=t().allNew;
+ $('#continueVideoTitle').textContent=videoTitle('v2');
+ $('#continueVideoMeta').textContent=t().continueMeta;
+ $('#categoriesSub').textContent=t().sub.categories;
+ $('#liveSub').textContent=t().sub.live;
+ $('#materialsSub').textContent=t().sub.materials;
+ $('#savedSub').textContent=t().sub.saved;
+ $('#lessonHeader').textContent=t().lesson;
+ $('#langSheetTitle').textContent=t().languageTitle;
+ $('#langSheetSub').textContent=t().languageSub;
+ $$('.navLabel').forEach(el=>el.textContent=t().nav[el.dataset.nav]);
+ $('#langButtonHome').textContent=t().code;
+ $('#langButtonSection').textContent=t().code;
+ updateHeader(currentPage);
+ $$('.langOption').forEach(el=>el.classList.toggle('active',el.dataset.lang===currentLang))
+}
+function updateHeader(id){
+ const home=id==='home';
+ $('#homeHeader').hidden=!home; $('#sectionHeader').hidden=home;
+ if(!home)$('#sectionHeaderTitle').textContent=t().page[id]||''
+}
+function renderAll(){
+ updateStaticUI(); renderBanners(); renderChips(); renderVideos(); renderCategories(); renderLive(); renderMaterials(); renderSaved(); restartBannerTimer()
+}
+function go(id){
+ currentPage=id;
+ $$('.page').forEach(p=>p.classList.remove('active')); $('#'+id).classList.add('active');
+ $$('.nav').forEach(n=>n.classList.toggle('active',n.dataset.page===id));
+ updateHeader(id); $('#scrollArea').scrollTo({top:0,behavior:'auto'}); if(id==='saved')renderSaved()
+}
+
+function videoYoutubeId(v){
+ if(v.youtubeIds&&v.youtubeIds[currentLang])return v.youtubeIds[currentLang];
+ if(currentLang==='ru')return v.youtubeId||'';
+ return ''
+}
+function openVideo(id){
+ const v=data.videos.find(x=>x.id===id); if(!v)return;
+ currentVideoId=id;
+ $('#lessonTitle').textContent=videoTitle(v.id);
+ $('#lessonCat').textContent=`${catName(v.category)} · ${v.duration} · ${t().code}`;
+ $('#lessonDesc').textContent=videoDesc(v.id);
+ const p=$('#player'); p.className='player '+(v.orientation==='horizontal'?'horizontal':'vertical');
+ const yid=videoYoutubeId(v);
+ if(yid){
+   p.innerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(yid)}?playsinline=1" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+ }else{
+   p.innerHTML=`<div id="playerContent"><button class="bigPlay" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M9.2 6.8 17 12l-7.8 5.2z"/></svg></button><small>${esc(t().noVideo)}</small></div>`
+ }
+ updateFavoriteButton();
+ $('#watchedBtn').textContent=t().watched;
+ $('#lessonOverlay').classList.add('show')
+}
+function closeLesson(){$('#lessonOverlay').classList.remove('show');currentVideoId=null}
+function heartIcon(){return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.15-4.56-9.33-8.24C.46 9.03 3 4.8 6.88 4.8c2.1 0 4 1.03 5.12 2.68 1.12-1.65 3.02-2.68 5.12-2.68 3.88 0 6.42 4.23 4.21 7.96C19.15 16.44 12 21 12 21z"/></svg>'}
+function updateFavoriteButton(){
+ const saved=savedIds().includes(currentVideoId),btn=$('#favoriteBtn');
+ btn.classList.toggle('active',saved);
+ btn.innerHTML=heartIcon()+'<span>'+(saved?t().favoriteOn:t().favorite)+'</span>';
+}
+function toggleCurrentFavorite(){if(!currentVideoId)return;let arr=savedIds();arr=arr.includes(currentVideoId)?arr.filter(x=>x!==currentVideoId):[...arr,currentVideoId];setSaved(arr);updateFavoriteButton();renderSaved()}
+function markWatched(){if(!currentVideoId)return;const arr=JSON.parse(localStorage.getItem('ff_watched')||'[]');if(!arr.includes(currentVideoId))arr.push(currentVideoId);localStorage.setItem('ff_watched',JSON.stringify(arr));$('#watchedBtn').textContent=t().watched}
+
+function openLanguageSheet(){$('#langOverlay').classList.add('show');$$('.langOption').forEach(el=>el.classList.toggle('active',el.dataset.lang===currentLang))}
+function closeLanguageSheet(){$('#langOverlay').classList.remove('show')}
+function setLanguage(lang){
+ currentLang=lang; localStorage.setItem('ff_lang',lang); closeLanguageSheet(); renderAll();
+ if($('#lessonOverlay').classList.contains('show')&&currentVideoId)openVideo(currentVideoId)
+}
+
+function installScrollGuard(){
+ const scroller=$('#scrollArea'); if(!scroller)return; let startY=0;
+ scroller.addEventListener('touchstart',e=>{if(e.touches.length)startY=e.touches[0].clientY},{passive:true});
+ scroller.addEventListener('touchmove',e=>{
+   if(!e.touches.length)return; const y=e.touches[0].clientY,dy=y-startY;
+   const atTop=scroller.scrollTop<=0,atBottom=Math.ceil(scroller.scrollTop+scroller.clientHeight)>=scroller.scrollHeight;
+   if((atTop&&dy>0)||(atBottom&&dy<0))e.preventDefault()
+ },{passive:false})
+}
+
+window.ffHandleBack=function(){
+ if($('#langOverlay').classList.contains('show')){closeLanguageSheet();return true}
+ if($('#lessonOverlay').classList.contains('show')){closeLesson();return true}
+ if(currentPage!=='home'){go('home');return true}
+ return false
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+ lockViewport(); renderAll(); installScrollGuard(); $('#search').addEventListener('input',renderVideos)
+});
+window.addEventListener('orientationchange',()=>setTimeout(lockViewport,350));

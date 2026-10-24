@@ -1,0 +1,2 @@
+/* Settings module — independent view of connection state. */
+(()=>{const A=window.FFAdmin;A.modules.settings={render(){A.$('#settings-mode').textContent=A.state.mode==='firebase'?'Firebase: подключено':'Вход не выполнен';A.$('#settings-project').textContent=window.FF_FIREBASE_CONFIG?.projectId||'—';A.$('#settings-user').textContent=A.state.currentUser?.email||'Нет авторизованного пользователя';}};})();

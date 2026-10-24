@@ -1,0 +1,42 @@
+
+:root { color-scheme: dark; --background:#090A0C; --accent:#D4FF39; }
+* { box-sizing:border-box; }
+html,body { margin:0; width:100%; height:100%; background:var(--background); }
+body { font-family:system-ui,-apple-system,"Segoe UI",sans-serif; color:#fff; overflow:hidden; }
+.preview-label { position:fixed; top:max(24px,env(safe-area-inset-top)); left:0; right:0; text-align:center; font-size:10px; letter-spacing:.19em; color:#777b80; }
+.stage { position:fixed; inset:0; display:grid; place-items:center; padding:28px; }
+.composition { display:flex; flex-direction:column; align-items:center; transform:translateY(-22px); }
+.icon { width:clamp(190px,65vw,302px); height:auto; display:block; overflow:visible; }
+.frame,.letter,.play,.play-light,.glint,.brand { opacity:0; }
+.letter,.play { transform-box:view-box; transform-origin:50% 50%; }
+.brand { margin:17px 0 0; font-size:clamp(23px,6vw,29px); font-weight:500; letter-spacing:-.035em; line-height:1.25; white-space:nowrap; }
+.brand::after { content:""; display:block; width:28px; height:2px; margin:15px auto 0; background:var(--accent); border-radius:2px; box-shadow:0 0 12px #d4ff3938; }
+.running .composition { animation:exit 6.3s linear both; }
+.running .frame { animation:frame-in .2s cubic-bezier(.2,.65,.3,1) both; }
+.running .letter { animation:letter-in .7s .2s cubic-bezier(.16,1,.3,1) both; }
+.running .play { animation:play-in .3s .9s ease-out both; }
+.running .play-light { animation:play-light .3s .9s ease-in-out both; }
+.running .glint { animation:glint .3s .9s ease-in-out both; }
+.running .brand { animation:brand-in 1.2s 1.2s cubic-bezier(.4,0,.2,1) both; }
+.controls { position:fixed; bottom:max(30px,env(safe-area-inset-bottom)); left:20px; right:20px; display:flex; align-items:center; flex-direction:column; gap:13px; }
+button { min-height:46px; padding:12px 23px; color:#D4FF39; background:#15180f; border:1px solid #d4ff3930; border-radius:24px; font:500 13px system-ui,sans-serif; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+button:hover { background:#202616; } button:focus-visible { outline:2px solid var(--accent); outline-offset:5px; }
+.status { color:#777b80; font-size:11px; min-height:15px; text-align:center; }
+@keyframes frame-in { from { opacity:.2; } to { opacity:1; } }
+@keyframes letter-in { from { opacity:0; transform:scale(.965) translateY(9px); } to { opacity:1; transform:scale(1) translateY(0); } }
+@keyframes play-in { from { opacity:0; transform:scale(.985); } to { opacity:1; transform:scale(1); } }
+@keyframes play-light { 0%,100% { opacity:0; } 45% { opacity:.2; } }
+@keyframes glint { 0% { opacity:0; transform:translateX(-800px); } 25% { opacity:.12; } 70% { opacity:.12; } 100% { opacity:0; transform:translateX(800px); } }
+@keyframes brand-in { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes exit { 0%,93.650794% { opacity:1; } 100% { opacity:0; } }
+@media (max-height:520px) { .icon { width:160px; } .composition { transform:translateY(-20px); } .brand { font-size:22px; margin-top:4px; } .preview-label { top:12px; } .controls { bottom:12px; gap:6px; } }
+@media (prefers-reduced-motion:reduce) {
+ .running .frame,.running .letter,.running .play,.running .brand { animation:none; opacity:1; transform:none; }
+ .running .glint,.running .play-light { animation:none; opacity:0; }
+ .running .composition { animation:reduced-exit 6.3s linear both; }
+ @keyframes reduced-exit { 0%,93.650794% { opacity:1; } 100% { opacity:0; } }
+}
+
+/* Android overlay: no test-only controls or external UI. */
+html,body,.stage{background:#090A0C!important;}
+.stage{pointer-events:none;}

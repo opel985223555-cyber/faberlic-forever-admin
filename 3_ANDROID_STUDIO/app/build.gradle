@@ -1,0 +1,37 @@
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
+
+android {
+    namespace 'tj.faberlic.forever'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'tj.faberlic.forever'
+        minSdk 24
+        targetSdk 35
+        versionCode 12
+        versionName '0.9.12-category-access'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+
+dependencies {
+    // Allow the *nested video player only* to have a stable HTTPS origin.
+    implementation 'androidx.webkit:webkit:1.16.0' 
+    // Firebase versions are managed together through the official BoM.
+    implementation platform('com.google.firebase:firebase-bom:34.19.0')
+
+    // Prepared for the Faberlic Forever backend.
+    implementation 'com.google.firebase:firebase-firestore'
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-storage'
+}

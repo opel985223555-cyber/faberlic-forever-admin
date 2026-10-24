@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><meta name="theme-color" content="#0b0d0d"><meta name="description" content="Faberlic Forever — админ-панель управления обучающими видео"><title>Faberlic Forever · Админ-панель</title><link rel="stylesheet" href="./assets/css/base.css?v=cms08"><link rel="stylesheet" href="./assets/css/overview.css?v=cms08"><link rel="stylesheet" href="./assets/css/videos.css?v=cms08"><link rel="stylesheet" href="./assets/css/categories.css?v=cms12"><link rel="stylesheet" href="./assets/css/live.css?v=cms10"><link rel="stylesheet" href="./assets/css/settings.css?v=cms08"><link rel="stylesheet" href="./assets/css/branding.css?v=cms08"><link rel="icon" type="image/png" href="./assets/images/forever-favicon.png"></head><body>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<section id="login-screen" class="login-screen">
+ <div class="login-card">
+  <div class="brand-mark"><img src="./assets/images/forever-logo.png" alt="Логотип Faberlic Forever" width="100" height="100"></div>
+  <div class="brand-kicker">FABERLIC FOREVER</div>
+  <h1>Панель управления</h1>
+  <p class="login-lead">Управление обучением и видеоуроками команды.</p>
+  <form id="login-form" class="stack" autocomplete="on">
+   <label class="field">Электронная почта<input id="login-email" type="email" name="email" autocomplete="username" placeholder="Ваш email" required></label>
+   <label class="field">Пароль<input id="login-password" type="password" name="password" autocomplete="current-password" placeholder="••••••••" required></label>
+   <button class="btn primary full" id="sign-in" type="submit">Войти в админ-панель <span>→</span></button>
+  </form>
+  <p id="auth-info" class="notice">Вход для администратора Faberlic Forever.</p>
+ </div>
+ <div class="login-art"><div class="orb"></div><div class="art-title">Обучение.<br><em>Развитие.</em><br>Результат.</div><p>Одна панель для всей системы обучения Faberlic Forever</p><div class="art-caption">FABERLIC FOREVER · ADMIN</div></div>
+</section>
+<div id="admin-shell" class="app-shell" hidden>
+ <aside id="sidebar" class="sidebar">
+  <div class="sidebar-brand"><div class="mini-logo"><img src="./assets/images/forever-logo.png" alt="Логотип Faberlic Forever" width="46" height="46"></div><div><strong>Faberlic Forever</strong><small>АДМИН-ПАНЕЛЬ</small></div></div>
+  <div class="nav-caption">УПРАВЛЕНИЕ</div>
+  <nav class="sidebar-nav" aria-label="Разделы админ-панели">
+   <button class="nav-button active" data-page="overview"><span class="nav-symbol">◫</span> Обзор</button>
+   <button class="nav-button" data-page="videos"><span class="nav-symbol">▷</span> Видеоуроки</button>
+   <button class="nav-button" data-page="categories"><span class="nav-symbol">▦</span> Категории</button>
+   <button class="nav-button" data-page="ranks"><span class="nav-symbol">▥</span> Обучение по статусам</button>
+   <div class="nav-divider"></div>
+   <button class="nav-button" data-page="live"><span class="nav-symbol">◉</span> Эфиры</button>
+   <button class="nav-button" data-page="materials"><span class="nav-symbol">▤</span> Материалы</button>
+   <button class="nav-button" data-page="settings"><span class="nav-symbol">⚙</span> Настройки</button>
+  </nav>
+  <div class="sidebar-bottom"><div class="access-dot"></div><span id="mode-pill">Защищённый доступ</span></div>
+ </aside>
+ <main class="workarea">
+  <header class="topbar"><button id="open-sidebar" class="hamburger" type="button" aria-label="Меню">☰</button><div class="topbar-label">Управление контентом <span>/</span> <strong id="page-title">Обзор</strong></div><div class="topbar-right"><div class="online-dot"></div><span id="operator">—</span><button id="log-out" class="btn logout" type="button">Выйти</button></div></header>
+  <div class="content">
+   <section data-module="overview" class="module-view"><div class="section-head"><div><span class="eyebrow">ДОБРО ПОЖАЛОВАТЬ</span><h1>Обзор обучения</h1><p class="section-desc">Управляй видеоуроками и публикациями в одном месте.</p></div><button id="new-video" class="btn primary" type="button">+ Добавить урок</button></div>
+    <div class="metrics"><div class="metric-card"><span>Всего видеоуроков</span><strong id="metric-all">0</strong><small>Все языки и категории</small></div><div class="metric-card"><span>Опубликовано</span><strong id="metric-published">0</strong><small>Будут видны после подключения</small></div><div class="metric-card"><span>Черновики</span><strong id="metric-drafts">0</strong><small>Не показываются пользователям</small></div></div>
+    <div class="panel recent-panel"><div class="panel-heading"><h2>Последние видеоуроки</h2><span class="eyebrow">ОБНОВЛЕНИЯ</span></div><div id="recent-list"></div></div>
+    <div class="info-panel"><span class="info-symbol">ⓘ</span><div><strong>Видео хранятся на YouTube</strong><p>Для публикации добавляй ссылку. Крупные видеофайлы не загружаются на сайт или в Firebase.</p></div></div>
+   </section>
+   <section data-module="videos" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">БИБЛИОТЕКА ОБУЧЕНИЯ</span><h1>Видеоуроки</h1><p class="section-desc">Добавляй ссылки YouTube, выбирай категорию, уровень и язык.</p></div></div>
+    <div class="panel form-panel" id="form-card"><div class="panel-heading"><h2 id="form-heading">Новый видеоурок</h2><span class="tagline">Только ссылка · YouTube</span></div>
+     <form id="lesson-form" autocomplete="off"><div class="form-grid"><label class="field wide">Название урока <input id="lesson-title" name="title" type="text" maxlength="160" placeholder="Например: Первые шаги в Faberlic" required></label>
+       <label class="field wide">Ссылка на YouTube <input id="lesson-url" name="url" type="url" placeholder="https://youtu.be/XXXXXXXXXXX" required><small id="youtube-hint">Поддерживается YouTube, Shorts и youtu.be</small>
+       <div id="youtube-cover-preview" class="youtube-cover-preview" hidden aria-live="polite">
+        <img id="youtube-cover-preview-img" alt="Автоматическая обложка YouTube" loading="lazy">
+        <div><strong>Автоматическая обложка YouTube</strong><small>Эта заставка появится в «Новинках», категориях, избранном и на баннере. Ничего загружать не нужно.</small></div>
+       </div></label>
+       <label class="field">Категория <select id="lesson-category" required></select></label>
+       <label class="field" id="topic-row" hidden>Подраздел / статус <select id="lesson-topic"></select></label>
+       <label class="field">Язык видео <select id="lesson-lang"><option value="ru">RU · Русский</option><option value="tj">TJ · Таджикский</option><option value="uz">UZ · Узбекский</option></select></label>
+       <label class="field">Формат <select id="lesson-orientation"><option value="vertical">Вертикальный · 9:16</option><option value="horizontal">Горизонтальный · 16:9</option></select></label>
+       <label class="field">Публикация <select id="lesson-status"><option value="draft">Черновик</option><option value="published">Опубликовать</option></select></label>
+       
+       <label class="field wide">Описание урока <textarea id="lesson-description" rows="3" maxlength="1200" placeholder="Коротко: чему научится консультант"></textarea></label></div>
+       <div class="form-actions"><button type="submit" id="save-lesson" class="btn primary">Сохранить урок</button><button id="cancel-edit" class="btn secondary" type="button" hidden>Отмена редактирования</button></div>
+     </form>
+    </div>
+    <div class="panel library-panel"><div class="panel-heading"><div><h2>Список уроков</h2><span class="tiny-label" id="lesson-count">0 уроков</span></div><div class="filters"><select id="filter-category" aria-label="Раздел для порядка уроков"></select><select id="filter-lang" aria-label="Язык"><option value="all">Все языки</option><option value="ru">RU</option><option value="tj">TJ</option><option value="uz">UZ</option></select><input id="filter-search" type="search" placeholder="Поиск по названию…" aria-label="Поиск уроков"><select id="filter-status" aria-label="Статус урока"><option value="all">Все публикации</option><option value="published">Опубликовано</option><option value="draft">Черновики</option></select></div></div><div class="info-panel" style="margin:0 20px 12px"><span class="info-symbol">↕</span><div><strong>Порядок уроков</strong><p>Новые уроки добавляются в конец выбранного раздела. Меняй их местами кнопками ↑ / ↓ — без цифр.</p></div></div><div id="lesson-list"></div></div>
+   </section>
+   <section data-module="categories" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">СТРУКТУРА ОБУЧЕНИЯ</span><h1>Категории</h1><p class="section-desc">Изменяй названия, описания, вложенные разделы и доступность. Изменения вступают в силу после сохранения в Firebase.</p></div></div><div class="panel form-panel"><div class="panel-heading"><h2 id="category-form-title">Добавить раздел</h2><button id="category-new" class="small-button" type="button">+ Новый</button></div>
+      <div id="catalog-init-note" class="info-panel" style="margin:12px"><span class="info-symbol">ⓘ</span><div><strong>Существующие разделы пока локальные</strong><p>Нажми «Опубликовать структуру», чтобы сделать их редактируемыми в Firebase, не удаляя ни одного урока.</p><button id="catalog-init" class="btn secondary" type="button">Опубликовать структуру</button></div></div>
+      <form id="category-form"><input id="category-edit-id" type="hidden"><div class="form-grid">
+      <label class="field">Родительский раздел<select id="category-parent"></select></label><label class="field">Доступность<select id="category-status"><option value="active">Открыт</option><option value="soon">Скоро (вход закрыт)</option><option value="maintenance">Закрыто на техническое обслуживание</option><option value="hidden">Скрыт</option></select></label>
+      <label class="field">Название RU<input id="category-name-ru" maxlength="90" required></label><label class="field">Описание RU<input id="category-desc-ru" maxlength="180"></label>
+      <label class="field">Название TJ<input id="category-name-tj" maxlength="90"></label><label class="field">Описание TJ<input id="category-desc-tj" maxlength="180"></label>
+      <label class="field">Название UZ<input id="category-name-uz" maxlength="90"></label><label class="field">Описание UZ<input id="category-desc-uz" maxlength="180"></label>
+      </div><div class="form-actions"><button class="btn primary" type="submit" id="category-save">Добавить раздел</button></div></form></div>
+      <div class="panel catalog-panel" id="categories-list"></div></section>
+   <section data-module="ranks" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">СИСТЕМА РАЗВИТИЯ</span><h1>Обучение по статусам</h1><p class="section-desc">Для каждого статуса — свои видеоуроки. Выбирай нужный статус при добавлении видео.</p></div></div><div class="panel catalog-panel" id="ranks-list"></div></section>
+   <section data-module="live" class="module-view" hidden>
+    <div class="section-head"><div><span class="eyebrow">YOUTUBE · ОБУЧЕНИЕ</span><h1>Эфиры</h1><p class="section-desc">Анонсы, трансляции и записи лидеров. Статус «В эфире» устанавливается вручную.</p></div></div>
+    <div class="panel form-panel"><div class="panel-heading"><h2 id="live-form-title">Добавить эфир</h2><button id="live-new" class="small-button" type="button">+ Новый</button></div>
+      <form id="live-form" autocomplete="off"><div class="form-grid">
+       <label class="field wide">Название эфира<input id="live-title" maxlength="160" required placeholder="Например: Обучение новичков"></label>
+       <label class="field wide">Ссылка на YouTube<input id="live-url" type="url" required placeholder="https://www.youtube.com/live/…"><small>Ссылка на запланированную трансляцию или запись. Видео хранится на YouTube.</small></label>
+       <label class="field">Ведущий<input id="live-host" maxlength="100" placeholder="Имя лидера"></label>
+       <label class="field">Начало по местному времени<input id="live-date" type="datetime-local"></label>
+       <label class="field">Язык<select id="live-lang"><option value="ru">RU · Русский</option><option value="tj">TJ · Таджикский</option><option value="uz">UZ · Узбекский</option></select></label>
+       <label class="field">Состояние<select id="live-phase"><option value="scheduled">Запланирован</option><option value="live">В эфире</option><option value="recorded">Запись</option></select></label>
+       <label class="field">Публикация<select id="live-status"><option value="draft">Черновик</option><option value="published">Опубликовать</option></select></label>
+       <label class="field wide">Описание<textarea id="live-description" maxlength="1200" rows="3"></textarea></label>
+      </div><div class="form-actions"><button class="btn primary" type="submit" id="live-save">Сохранить эфир</button><button class="btn secondary" type="button" id="live-cancel" hidden>Отменить</button></div></form>
+    </div><div class="panel library-panel"><div class="panel-heading"><h2>Список эфиров</h2><button id="live-refresh" class="small-button" type="button">Обновить</button></div><div id="live-list" aria-live="polite"></div></div>
+   </section>
+   <section data-module="materials" class="module-view" hidden>
+    <div class="section-head"><div><span class="eyebrow">БИБЛИОТЕКА ОБУЧЕНИЯ</span><h1>Материалы</h1><p class="section-desc">Публикация чек-листов, инструкций и презентаций по безопасным ссылкам.</p></div></div>
+    <div class="panel form-panel"><div class="panel-heading"><h2 id="material-form-title">Добавить материал</h2><button id="material-new" class="small-button" type="button">+ Новый</button></div>
+      <div class="info-panel" style="margin:12px 20px"><span class="info-symbol">ⓘ</span><div><strong>Публикация по ссылке</strong><p>Сначала размести PDF или презентацию на Яндекс Диске, Google Drive или другом файловом сайте и открой доступ по ссылке. Файлы не загружаются в Firestore; прямая загрузка потребует отдельного хранилища.</p></div></div>
+      <form id="material-form" autocomplete="off"><div class="form-grid">
+       <label class="field wide">Название материала<input id="material-title" maxlength="160" required placeholder="Чек-лист новичка"></label>
+       <label class="field wide">Ссылка на файл или страницу<input id="material-url" type="url" required placeholder="https://…"></label>
+       <label class="field">Тип<select id="material-type"><option value="checklist">Чек-лист</option><option value="pdf">PDF / документ</option><option value="presentation">Презентация</option><option value="instruction">Инструкция</option><option value="link">Ссылка</option></select></label>
+       <label class="field">Язык<select id="material-lang"><option value="ru">RU · Русский</option><option value="tj">TJ · Таджикский</option><option value="uz">UZ · Узбекский</option></select></label>
+       <label class="field">Публикация<select id="material-status"><option value="draft">Черновик</option><option value="published">Опубликовать</option></select></label>
+       <label class="field wide">Описание<textarea id="material-description" maxlength="1200" rows="3"></textarea></label>
+      </div><div class="form-actions"><button class="btn primary" type="submit" id="material-save">Сохранить материал</button><button class="btn secondary" type="button" id="material-cancel" hidden>Отменить</button></div></form>
+    </div><div class="panel library-panel"><div class="panel-heading"><h2>Список материалов</h2><button id="material-refresh" class="small-button" type="button">Обновить</button></div><div id="material-list" aria-live="polite"></div></div>
+   </section>
+   <section data-module="settings" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">ДОСТУП И ПОДКЛЮЧЕНИЕ</span><h1>Настройки</h1><p class="section-desc">Информация об авторизации и подключении Firebase.</p></div></div><div class="panel settings-panel"><div><span>Режим</span><strong id="settings-mode">—</strong></div><div><span>Проект Firebase</span><strong id="settings-project">—</strong></div><div><span>Администратор</span><strong id="settings-user">—</strong></div><div><span>Модель хранения</span><strong>YouTube + Firestore</strong></div></div><div class="info-panel"><span class="info-symbol">⚑</span><div><strong>Настоящий пароль не хранится в коде сайта</strong><p>Авторизация выполняется через Firebase Authentication. Для записи данных дополнительно проверяются права администратора в Firestore Security Rules.</p></div></div></section>
+  </div>
+ </main>
+</div>
+<script src="./config/firebase-config.js"></script>
+<script src="./assets/js/core/state.js?v=cms08p1"></script><script src="./assets/js/core/catalog-seed.js?v=cms08p1"></script><script src="./assets/js/core/category-availability.js?v=cms12"></script><script src="./assets/js/core/firebase.js?v=cms12"></script><script src="./assets/js/core/repository.js?v=cms11"></script><script src="./assets/js/core/shell.js?v=cms10"></script>
+<script src="./assets/js/modules/overview.js?v=cms08p1"></script><script src="./assets/js/modules/videos.js?v=cms08p1"></script><script src="./assets/js/modules/categories.js?v=cms12"></script><script src="./assets/js/modules/ranks.js?v=cms08p1"></script><script src="./assets/js/modules/live.js?v=cms10"></script><script src="./assets/js/modules/materials.js?v=cms10"></script><script src="./assets/js/modules/settings.js?v=cms08p1"></script><script src="./assets/js/main.js?v=cms10"></script>
+</body></html>

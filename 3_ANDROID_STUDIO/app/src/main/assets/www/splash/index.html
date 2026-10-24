@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090A0C"><title>Faberlic Forever — Splash</title><link rel="stylesheet" href="splash.css"></head><body>
+<main class="stage" id="stage" aria-label="Анимированная заставка Faberlic Forever">
+ <div class="composition">
+  <svg class="icon" viewBox="0 0 1600 1600" role="img" aria-label="Оригинальный логотип Faberlic: F и Play на чёрном фоне" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+   <defs>
+    <image id="original" href="logo.png" width="1600" height="1600" preserveAspectRatio="xMidYMid meet"/>
+    <clipPath id="frame-clip"><path d="M 0 0 H 1600 V 1600 H 0 Z M 695 306 C 525 306 441 385 414 542 L 306 1151 C 282 1271 349 1301 461 1301 H 608 C 716 1301 772 1248 772 1162 C 772 1075 777 1020 810 990 C 852 955 924 960 994 952 C 1097 940 1124 862 1155 764 C 1175 690 1120 677 1085 677 H 975 L 777 596 C 732 578 687 587 663 634 C 674 582 710 568 760 568 H 1118 C 1237 568 1296 479 1327 376 C 1342 322 1311 306 1280 306 Z" clip-rule="evenodd"/></clipPath>
+    <clipPath id="letter-clip"><path d="M 695 306 C 525 306 441 385 414 542 L 306 1151 C 282 1271 349 1301 461 1301 H 608 C 716 1301 772 1248 772 1162 C 772 1075 777 1020 810 990 C 852 955 924 960 994 952 C 1097 940 1124 862 1155 764 C 1175 690 1120 677 1085 677 H 975 L 777 596 C 732 578 687 587 663 634 C 674 582 710 568 760 568 H 1118 C 1237 568 1296 479 1327 376 C 1342 322 1311 306 1280 306 Z M 710 608 C 733 608 748 618 765 631 L 923 743 C 947 760 955 778 949 802 C 945 822 932 833 912 845 L 708 952 C 677 965 640 949 635 914 C 635 905 637 889 639 875 L 668 654 C 671 627 686 611 710 608 Z" clip-rule="evenodd"/></clipPath>
+    <clipPath id="play-clip"><path d="M 710 608 C 733 608 748 618 765 631 L 923 743 C 947 760 955 778 949 802 C 945 822 932 833 912 845 L 708 952 C 677 965 640 949 635 914 C 635 905 637 889 639 875 L 668 654 C 671 627 686 611 710 608 Z"/></clipPath>
+    <clipPath id="inner-clip"><path d="M 695 306 C 525 306 441 385 414 542 L 306 1151 C 282 1271 349 1301 461 1301 H 608 C 716 1301 772 1248 772 1162 C 772 1075 777 1020 810 990 C 852 955 924 960 994 952 C 1097 940 1124 862 1155 764 C 1175 690 1120 677 1085 677 H 975 L 777 596 C 732 578 687 587 663 634 C 674 582 710 568 760 568 H 1118 C 1237 568 1296 479 1327 376 C 1342 322 1311 306 1280 306 Z"/></clipPath>
+    <linearGradient id="shine"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".65"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+   </defs>
+   <!-- Solid opaque backing remains throughout the icon reveal. -->
+   <rect x="110" y="124" width="1372" height="1347" rx="300" fill="#000"/>
+   <g class="frame" clip-path="url(#frame-clip)"><use href="#original" xlink:href="#original"/></g>
+   <g class="letter"><g clip-path="url(#letter-clip)"><use href="#original" xlink:href="#original"/></g></g>
+   <g class="play"><g clip-path="url(#play-clip)"><use href="#original" xlink:href="#original"/></g></g>
+   <path class="play-light" d="M 710 608 C 733 608 748 618 765 631 L 923 743 C 947 760 955 778 949 802 C 945 822 932 833 912 845 L 708 952 C 677 965 640 949 635 914 C 635 905 637 889 639 875 L 668 654 C 671 627 686 611 710 608 Z" fill="#D4FF39"/>
+   <g clip-path="url(#inner-clip)"><rect class="glint" x="620" y="290" width="180" height="1040" fill="url(#shine)" transform="skewX(-18)"/></g>
+  </svg>
+  <h1 class="brand">Faberlic Forever</h1>
+ </div>
+</main>
+<script src="splash.js"></script></body></html>
