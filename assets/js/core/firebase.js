@@ -104,6 +104,7 @@
  A.dataGuard={catalog,lesson,revision,leaf,scopeId,maxDepth:20};
  A.firebaseReady=()=>Boolean(cfg.apiKey&&cfg.projectId&&cfg.appId&&cfg.authDomain);
  A.firebase={
+  services(){if(!sdk||!db||!A.state.currentUser||A.state.mode!=='firebase')fail('Требуется авторизация администратора');return {store:sdk.db,db};},
   async init(onChange){
    if(!A.firebaseReady())return false;
    try{
@@ -193,7 +194,11 @@
     const siblings=current.filter(v=>v.id!==targetId&&scopeId(v)===targetScope);
     const order=old&&oldScope===targetScope?Math.max(1,Number(existing.order)||1):Math.max(0,...siblings.map(v=>Number(v.order)||0))+1;
     if(!Number.isSafeInteger(order))fail('Порядок уроков достиг безопасного предела');
-    const patch={...data,order,revision:revision(existing?.revision)+1,orderScopeId:targetScope,orderRevision:revisions[targetScope]+1,updatedAt:timestamp()};
+    const publication={};
+    if(existing?.publishedAt)publication.publishedAt=existing.publishedAt;
+    else if(existing?.status==='published'&&typeof existing.createdAt?.toMillis==='function')publication.publishedAt=existing.createdAt;
+    else if(data.status==='published')publication.publishedAt=timestamp();
+    const patch={...data,...publication,order,revision:revision(existing?.revision)+1,orderScopeId:targetScope,orderRevision:revisions[targetScope]+1,updatedAt:timestamp()};
     writeGuard(tx,guard,lessonCounts(guard,cat,existing,data),'lesson',targetId);
     for(const s of affected)bump(tx,s,s===targetScope?data:old,revisions[s]);
     if(id)tx.update(ref,patch);else tx.set(ref,{...patch,clientRequestId:pending.token,createdAt:timestamp()});

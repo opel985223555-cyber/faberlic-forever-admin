@@ -12,12 +12,12 @@
    A.state.section=section;
    A.$$('.nav-button').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===section));
    A.$$('.module-view').forEach(el=>el.hidden=el.dataset.module!==section);
-   const headings={overview:'Обзор',videos:'Видеоуроки',categories:'Категории',ranks:'Обучение по статусам',live:'Эфиры',materials:'Материалы',settings:'Настройки'};
+   const headings={overview:'Обзор',videos:'Видеоуроки',categories:'Категории',ranks:'Обучение по статусам',promocodes:'Промокоды',materials:'Материалы',settings:'Настройки'};
    A.$('#page-title').textContent=headings[section]||'Админ-панель';
    A.$('#sidebar').classList.remove('open');
    if(A.modules[section]?.render)A.modules[section].render();
  };
  A.modules={};
- A.refreshAll=async()=>{await A.repo.refresh();A.modules.overview?.render();A.modules.videos?.render();A.modules.categories?.render();A.modules.ranks?.render();A.modules.live?.refresh?.();A.modules.materials?.refresh?.();};
+ A.refreshAll=async()=>{await A.repo.refresh();A.modules.overview?.render();A.modules.videos?.render();A.modules.categories?.render();A.modules.ranks?.render();A.modules.materials?.refresh?.();};
  A.$on=(el,type,handler)=>el?.addEventListener(type,handler);
 })();

@@ -1,0 +1,380 @@
+{
+  "items": [
+    {
+      "id": "newbie",
+      "parentId": null,
+      "name": {
+        "ru": "Новичку",
+        "tj": "Барои навкор",
+        "uz": "Янги бошловчига"
+      },
+      "description": {
+        "ru": "Первые шаги в Faberlic",
+        "tj": "Қадамҳои аввал дар Faberlic",
+        "uz": "Faberlicда биринчи қадамлар"
+      },
+      "icon": "spark",
+      "status": "active",
+      "order": 1
+    },
+    {
+      "id": "sales",
+      "parentId": null,
+      "name": {
+        "ru": "Продажи",
+        "tj": "Фурӯш",
+        "uz": "Сотув"
+      },
+      "description": {
+        "ru": "Как продавать больше",
+        "tj": "Чӣ хел бештар фурӯшем",
+        "uz": "Кўпроқ сотиш йўллари"
+      },
+      "icon": "bars",
+      "status": "active",
+      "order": 2
+    },
+    {
+      "id": "recruit",
+      "parentId": null,
+      "name": {
+        "ru": "Рекрутинг",
+        "tj": "Даъват",
+        "uz": "Таклиф қилиш"
+      },
+      "description": {
+        "ru": "Приглашение и команда",
+        "tj": "Чӣ хел одам даъват кунем",
+        "uz": "Одам таклиф қилиш ва команда"
+      },
+      "icon": "users",
+      "status": "active",
+      "order": 3
+    },
+    {
+      "id": "product",
+      "parentId": null,
+      "name": {
+        "ru": "Продукция",
+        "tj": "Маҳсулот",
+        "uz": "Маҳсулот"
+      },
+      "description": {
+        "ru": "Обзоры и рекомендации",
+        "tj": "Шарҳ ва тавсияҳо",
+        "uz": "Шарҳ ва тавсиялар"
+      },
+      "icon": "diamond",
+      "status": "active",
+      "order": 4
+    },
+    {
+      "id": "health",
+      "parentId": null,
+      "name": {
+        "ru": "Здоровье",
+        "tj": "Саломатӣ",
+        "uz": "Саломатлик"
+      },
+      "description": {
+        "ru": "БАДы и wellness",
+        "tj": "БАД ва маҳсулоти саломатӣ",
+        "uz": "БАД ва саломатлик маҳсулотлари"
+      },
+      "icon": "heart",
+      "status": "active",
+      "order": 5
+    },
+    {
+      "id": "cabinet",
+      "parentId": null,
+      "name": {
+        "ru": "Личный кабинет",
+        "tj": "Кабинети шахсӣ",
+        "uz": "Шахсий кабинет"
+      },
+      "description": {
+        "ru": "Заказы, оплата, инструменты",
+        "tj": "Заказ, пардохт ва асбобҳо",
+        "uz": "Буюртма, тўлов ва воситалар"
+      },
+      "icon": "screen",
+      "status": "active",
+      "order": 6
+    },
+    {
+      "id": "team",
+      "parentId": null,
+      "name": {
+        "ru": "Работа с командой",
+        "tj": "Кор бо команда",
+        "uz": "Команда билан ишлаш"
+      },
+      "description": {
+        "ru": "Рост и сопровождение",
+        "tj": "Рушд ва дастгирии команда",
+        "uz": "Ўсиш ва командани қўллаб-қувватлаш"
+      },
+      "icon": "team",
+      "status": "active",
+      "order": 7
+    },
+    {
+      "id": "social",
+      "parentId": null,
+      "name": {
+        "ru": "Соцсети и продвижение",
+        "tj": "Шабакаҳои иҷтимоӣ ва реклама",
+        "uz": "Ижтимоий тармоқлар ва реклама"
+      },
+      "description": {
+        "ru": "Реклама, монтаж и контент",
+        "tj": "Реклама, монтаж ва контент",
+        "uz": "Реклама, монтаж ва контент"
+      },
+      "icon": "screen",
+      "status": "active",
+      "order": 8
+    },
+    {
+      "id": "ranks",
+      "parentId": null,
+      "name": {
+        "ru": "Обучение по статусам",
+        "tj": "Дарсҳо аз рӯи статус",
+        "uz": "Статуслар бўйича дарслар"
+      },
+      "description": {
+        "ru": "Уроки для каждого уровня",
+        "tj": "Дарсҳо барои ҳар як зина",
+        "uz": "Ҳар бир босқич учун дарслар"
+      },
+      "icon": "team",
+      "status": "active",
+      "order": 9
+    },
+    {
+      "id": "social__accounts",
+      "parentId": "social",
+      "name": {
+        "ru": "Работа в социальных сетях",
+        "tj": "Кор дар шабакаҳои иҷтимоӣ",
+        "uz": "Ижтимоий тармоқларда ишлаш"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 1,
+      "legacyTopicId": "accounts"
+    },
+    {
+      "id": "social__target",
+      "parentId": "social",
+      "name": {
+        "ru": "Таргетированная реклама",
+        "tj": "Таргет реклама",
+        "uz": "Таргет реклама"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 2,
+      "legacyTopicId": "target"
+    },
+    {
+      "id": "social__editing",
+      "parentId": "social",
+      "name": {
+        "ru": "Монтаж видео",
+        "tj": "Монтажи видео",
+        "uz": "Видео монтаж"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 3,
+      "legacyTopicId": "editing"
+    },
+    {
+      "id": "social__design",
+      "parentId": "social",
+      "name": {
+        "ru": "Оформление и дизайн",
+        "tj": "Дизайн ва ороиш",
+        "uz": "Дизайн ва безак"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 4,
+      "legacyTopicId": "design"
+    },
+    {
+      "id": "social__content",
+      "parentId": "social",
+      "name": {
+        "ru": "Контент и публикации",
+        "tj": "Контент ва постҳо",
+        "uz": "Контент ва постлар"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 5,
+      "legacyTopicId": "content"
+    },
+    {
+      "id": "ranks__3",
+      "parentId": "ranks",
+      "name": {
+        "ru": "3% — Консультант",
+        "tj": "3% — Консультант",
+        "uz": "3% — Консультант"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 1,
+      "legacyTopicId": "3"
+    },
+    {
+      "id": "ranks__6",
+      "parentId": "ranks",
+      "name": {
+        "ru": "6% — Старший консультант",
+        "tj": "6% — Консультанти калон",
+        "uz": "6% — Катта консультант"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 2,
+      "legacyTopicId": "6"
+    },
+    {
+      "id": "ranks__9",
+      "parentId": "ranks",
+      "name": {
+        "ru": "9% — Лидер",
+        "tj": "9% — Лидер",
+        "uz": "9% — Лидер"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 3,
+      "legacyTopicId": "9"
+    },
+    {
+      "id": "ranks__12",
+      "parentId": "ranks",
+      "name": {
+        "ru": "12% — Старший лидер",
+        "tj": "12% — Лидери калон",
+        "uz": "12% — Катта лидер"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 4,
+      "legacyTopicId": "12"
+    },
+    {
+      "id": "ranks__15",
+      "parentId": "ranks",
+      "name": {
+        "ru": "15% — Вице-директор",
+        "tj": "15% — Вице-директор",
+        "uz": "15% — Вице-директор"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 5,
+      "legacyTopicId": "15"
+    },
+    {
+      "id": "ranks__19",
+      "parentId": "ranks",
+      "name": {
+        "ru": "19% — Старший вице-директор",
+        "tj": "19% — Вице-директори калон",
+        "uz": "19% — Катта вице-директор"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 6,
+      "legacyTopicId": "19"
+    },
+    {
+      "id": "ranks__23",
+      "parentId": "ranks",
+      "name": {
+        "ru": "23% — Директор",
+        "tj": "23% — Директор",
+        "uz": "23% — Директор"
+      },
+      "description": {
+        "ru": "",
+        "tj": "",
+        "uz": ""
+      },
+      "status": "active",
+      "order": 7,
+      "legacyTopicId": "23"
+    },
+    {
+      "id": "section_mve5c7oj_wn0jgk",
+      "parentId": null,
+      "name": {
+        "ru": "Faberlic Drive",
+        "tj": "Faberlic Drive",
+        "uz": "Faberlic Drive"
+      },
+      "description": {
+        "ru": "Набирайте от 100 баллов Личного объёма и присоединяйтесь к Faberlic Drive! Акции, проекты и награды для Лидеров.",
+        "tj": "Камаш 100 балли ҳаҷми шахсӣ ҷамъ кунед ва ба Faberlic Drive ҳамроҳ шавед! Аксияҳо, лоиҳаҳо ва мукофотҳо барои Лидерҳо.",
+        "uz": "Камида 100 балл шахсий ҳажм тўпланг ва Faberlic Drive дастурига қўшилинг! Лидерлар учун акциялар, лойиҳалар ва мукофотлар."
+      },
+      "status": "active",
+      "order": 10
+    }
+  ],
+  "revision": 1,
+  "updatedAt": "2026-10-18T18:15:57.965Z",
+  "version": 1
+}

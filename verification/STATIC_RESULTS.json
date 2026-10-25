@@ -1,0 +1,38 @@
+{
+  "environment": "Windows static grammar/resource analysis; native iOS SDK not compiled",
+  "results": [
+    {
+      "name": "Swift grammar: all sources parsed; this is not a compiler or SDK type check",
+      "result": "PASS"
+    },
+    {
+      "name": "iOS plist XML syntax",
+      "result": "PASS"
+    },
+    {
+      "name": "Xcode OpenStep syntax, internal object references and FirebaseAuth/source inclusion",
+      "result": "PASS"
+    },
+    {
+      "name": "Real iOS Firebase configuration",
+      "result": "OWNER_ACTION_REQUIRED",
+      "detail": "Original archive supplied example only; download actual registered iOS app plist"
+    },
+    {
+      "name": "Android resource/manifest XML",
+      "result": "PASS"
+    },
+    {
+      "name": "Android/iOS shared web assets identical; approved platform player URL, unloaded legacy live module and original backup excluded",
+      "result": "PASS"
+    },
+    {
+      "name": "Latest GitHub category module, red highlighting and unordered object comparison preserved",
+      "result": "PASS"
+    },
+    {
+      "name": "Android release AAB exists, ZIP CRC valid, unsigned",
+      "result": "PASS"
+    }
+  ]
+}

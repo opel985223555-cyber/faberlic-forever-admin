@@ -1,0 +1,145 @@
+{
+  "environment": "Android and iOS Web assets in Edge mobile viewport; mocked native bridge; no real Firebase/device keyboard/player network",
+  "results": [
+    {
+      "platform": "android",
+      "name": "Activation screen and privacy available before protected subscriptions",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Invalid code error is localized and no subscription starts",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Activation, four evenly spaced tabs and no chips or obsolete tabs",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Initial banner has ten ascending publications and new grid ten descending",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Eleventh publication shifts both feeds; draft excluded; old lesson remains in category",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Search reaches oldest lesson outside top ten and does not mix the ordinary feed",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Tap away and swipe dismiss search focus but preserve query and results",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "History starts empty and records only real opened lessons, moving repeats to front",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "History and access survive reload; content does not replay demo lessons",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Language switching retains ten-item rules and translated About/History",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Unpublishing and hiding category remove feed/history availability and stop open lesson",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Materials, category back navigation and approved fullscreen control remain",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Revoked state clears private UI; account deletion clears history and old favorites",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "No page exceptions and no horizontal overflow",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Activation screen and privacy available before protected subscriptions",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Invalid code error is localized and no subscription starts",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Activation, four evenly spaced tabs and no chips or obsolete tabs",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Initial banner has ten ascending publications and new grid ten descending",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Eleventh publication shifts both feeds; draft excluded; old lesson remains in category",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Search reaches oldest lesson outside top ten and does not mix the ordinary feed",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Tap away and swipe dismiss search focus but preserve query and results",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "History starts empty and records only real opened lessons, moving repeats to front",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "History and access survive reload; content does not replay demo lessons",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Language switching retains ten-item rules and translated About/History",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Unpublishing and hiding category remove feed/history availability and stop open lesson",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Materials, category back navigation and approved fullscreen control remain",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Revoked state clears private UI; account deletion clears history and old favorites",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "No page exceptions and no horizontal overflow",
+      "result": "PASS"
+    }
+  ]
+}

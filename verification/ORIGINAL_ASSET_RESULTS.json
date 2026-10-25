@@ -1,0 +1,12 @@
+[
+  {
+    "platform": "android",
+    "result": "PASS",
+    "original_asset_files_checked": 8
+  },
+  {
+    "platform": "ios",
+    "result": "PASS",
+    "original_asset_files_checked": 8
+  }
+]

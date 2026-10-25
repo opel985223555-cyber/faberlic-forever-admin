@@ -26,8 +26,8 @@
    <button class="nav-button" data-page="categories"><span class="nav-symbol">▦</span> Категории</button>
    <button class="nav-button" data-page="ranks"><span class="nav-symbol">▥</span> Обучение по статусам</button>
    <div class="nav-divider"></div>
-   <button class="nav-button" data-page="live"><span class="nav-symbol">◉</span> Эфиры</button>
    <button class="nav-button" data-page="materials"><span class="nav-symbol">▤</span> Материалы</button>
+   <button class="nav-button" data-page="promocodes"><span class="nav-symbol">⌘</span> Промокоды</button>
    <button class="nav-button" data-page="settings"><span class="nav-symbol">⚙</span> Настройки</button>
   </nav>
   <div class="sidebar-bottom"><div class="access-dot"></div><span id="mode-pill">Защищённый доступ</span></div>
@@ -70,21 +70,6 @@
       </div><div class="form-actions"><button class="btn primary" type="submit" id="category-save">Добавить раздел</button></div></form></div>
       <div class="panel catalog-panel" id="categories-list"></div></section>
    <section data-module="ranks" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">СИСТЕМА РАЗВИТИЯ</span><h1>Обучение по статусам</h1><p class="section-desc">Для каждого статуса — свои видеоуроки. Выбирай нужный статус при добавлении видео.</p></div></div><div class="panel catalog-panel" id="ranks-list"></div></section>
-   <section data-module="live" class="module-view" hidden>
-    <div class="section-head"><div><span class="eyebrow">YOUTUBE · ОБУЧЕНИЕ</span><h1>Эфиры</h1><p class="section-desc">Анонсы, трансляции и записи лидеров. Статус «В эфире» устанавливается вручную.</p></div></div>
-    <div class="panel form-panel"><div class="panel-heading"><h2 id="live-form-title">Добавить эфир</h2><button id="live-new" class="small-button" type="button">+ Новый</button></div>
-      <form id="live-form" autocomplete="off"><div class="form-grid">
-       <label class="field wide">Название эфира<input id="live-title" maxlength="160" required placeholder="Например: Обучение новичков"></label>
-       <label class="field wide">Ссылка на YouTube<input id="live-url" type="url" required placeholder="https://www.youtube.com/live/…"><small>Ссылка на запланированную трансляцию или запись. Видео хранится на YouTube.</small></label>
-       <label class="field">Ведущий<input id="live-host" maxlength="100" placeholder="Имя лидера"></label>
-       <label class="field">Начало по местному времени<input id="live-date" type="datetime-local"></label>
-       <label class="field">Язык<select id="live-lang"><option value="ru">RU · Русский</option><option value="tj">TJ · Таджикский</option><option value="uz">UZ · Узбекский</option></select></label>
-       <label class="field">Состояние<select id="live-phase"><option value="scheduled">Запланирован</option><option value="live">В эфире</option><option value="recorded">Запись</option></select></label>
-       <label class="field">Публикация<select id="live-status"><option value="draft">Черновик</option><option value="published">Опубликовать</option></select></label>
-       <label class="field wide">Описание<textarea id="live-description" maxlength="1200" rows="3"></textarea></label>
-      </div><div class="form-actions"><button class="btn primary" type="submit" id="live-save">Сохранить эфир</button><button class="btn secondary" type="button" id="live-cancel" hidden>Отменить</button></div></form>
-    </div><div class="panel library-panel"><div class="panel-heading"><h2>Список эфиров</h2><button id="live-refresh" class="small-button" type="button">Обновить</button></div><div id="live-list" aria-live="polite"></div></div>
-   </section>
    <section data-module="materials" class="module-view" hidden>
     <div class="section-head"><div><span class="eyebrow">БИБЛИОТЕКА ОБУЧЕНИЯ</span><h1>Материалы</h1><p class="section-desc">Публикация чек-листов, инструкций и презентаций по безопасным ссылкам.</p></div></div>
     <div class="panel form-panel"><div class="panel-heading"><h2 id="material-form-title">Добавить материал</h2><button id="material-new" class="small-button" type="button">+ Новый</button></div>
@@ -99,11 +84,17 @@
       </div><div class="form-actions"><button class="btn primary" type="submit" id="material-save">Сохранить материал</button><button class="btn secondary" type="button" id="material-cancel" hidden>Отменить</button></div></form>
     </div><div class="panel library-panel"><div class="panel-heading"><h2>Список материалов</h2><button id="material-refresh" class="small-button" type="button">Обновить</button></div><div id="material-list" aria-live="polite"></div></div>
    </section>
+   <section data-module="promocodes" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">ДОСТУП К ОБУЧЕНИЮ</span><h1>Промокоды</h1><p class="section-desc">Одноразовые коды общие для Android и iPhone. Создание выполняется только после вашего подтверждения.</p></div></div>
+    <div class="panel form-panel"><div class="panel-heading"><h2>Одноразовые коды</h2></div><div class="stack" style="padding:20px"><label class="field">Количество (до 5000)<input id="promo-amount" type="number" min="1" max="5000" value="5000"></label><button id="promo-generate" class="btn primary" type="button">Генерировать</button><p id="promo-progress" role="status"></p></div></div>
+    <div class="panel form-panel"><div class="panel-heading"><h2>Универсальный — безлимитный</h2></div><div class="stack" style="padding:20px"><code id="universal-code" style="user-select:text;overflow-wrap:anywhere">Не создан</code><button id="universal-create" class="btn secondary" type="button">Создать / заменить</button><button id="universal-disable" class="small-button" type="button">Отключить</button><p>Замена или отключение прекращает доступ установок, активированных этим кодом.</p></div></div>
+    <div class="panel catalog-panel"><div class="panel-heading"><h2>Список кодов</h2><button id="promo-refresh" class="small-button" type="button">Обновить</button><button id="promo-export" class="small-button" type="button">Экспорт CSV для Excel</button></div><div class="filters"><input id="promo-search" type="search" placeholder="Поиск кода"><select id="promo-filter"><option value="all">Все</option><option value="free">Свободные</option><option value="used">Использованные</option><option value="blocked">Заблокированные</option></select></div><p id="promo-count"></p><div id="promo-list"></div><div class="form-actions"><button id="promo-prev" class="small-button" type="button">←</button><span id="promo-pagination"></span><button id="promo-next" class="small-button" type="button">→</button></div></div>
+    <div class="panel catalog-panel"><div class="panel-heading"><h2>Активированные установки</h2></div><div id="promo-installations"></div></div>
+   </section>
    <section data-module="settings" class="module-view" hidden><div class="section-head"><div><span class="eyebrow">ДОСТУП И ПОДКЛЮЧЕНИЕ</span><h1>Настройки</h1><p class="section-desc">Информация об авторизации и подключении Firebase.</p></div></div><div class="panel settings-panel"><div><span>Режим</span><strong id="settings-mode">—</strong></div><div><span>Проект Firebase</span><strong id="settings-project">—</strong></div><div><span>Администратор</span><strong id="settings-user">—</strong></div><div><span>Модель хранения</span><strong>YouTube + Firestore</strong></div></div><div class="info-panel"><span class="info-symbol">⚑</span><div><strong>Настоящий пароль не хранится в коде сайта</strong><p>Авторизация выполняется через Firebase Authentication. Для записи данных дополнительно проверяются права администратора в Firestore Security Rules.</p></div></div></section>
   </div>
  </main>
 </div>
 <script src="./config/firebase-config.js"></script>
-<script src="./assets/js/core/state.js?v=cms08p1"></script><script src="./assets/js/core/catalog-seed.js?v=cms08p1"></script><script src="./assets/js/core/category-availability.js?v=cms12"></script><script src="./assets/js/core/firebase.js?v=cms13spark-fix1"></script><script src="./assets/js/core/repository.js?v=cms13spark"></script><script src="./assets/js/core/shell.js?v=cms10"></script>
-<script src="./assets/js/modules/overview.js?v=cms08p1"></script><script src="./assets/js/modules/videos.js?v=cms08p1"></script><script src="./assets/js/modules/categories.js?v=cms13-status-color"></script><script src="./assets/js/modules/ranks.js?v=cms08p1"></script><script src="./assets/js/modules/live.js?v=cms10"></script><script src="./assets/js/modules/materials.js?v=cms10"></script><script src="./assets/js/modules/settings.js?v=cms08p1"></script><script src="./assets/js/main.js?v=cms10"></script>
+<script src="./assets/js/core/state.js?v=cms08p1"></script><script src="./assets/js/core/catalog-seed.js?v=cms08p1"></script><script src="./assets/js/core/category-availability.js?v=cms12"></script><script src="./assets/js/core/firebase.js?v=updated14"></script><script src="./assets/js/core/invite-code.js?v=updated14"></script><script src="./assets/js/core/promo-repository.js?v=updated14"></script><script src="./assets/js/core/repository.js?v=cms13spark"></script><script src="./assets/js/core/shell.js?v=updated14"></script>
+<script src="./assets/js/modules/overview.js?v=cms08p1"></script><script src="./assets/js/modules/videos.js?v=cms08p1"></script><script src="./assets/js/modules/categories.js?v=cms13-status-color"></script><script src="./assets/js/modules/ranks.js?v=cms08p1"></script><script src="./assets/js/modules/materials.js?v=cms10"></script><script src="./assets/js/modules/settings.js?v=cms08p1"></script><script src="./assets/js/modules/promocodes.js?v=updated14"></script><script src="./assets/js/main.js?v=updated14"></script>
 </body></html>

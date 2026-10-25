@@ -1,0 +1,182 @@
+{
+  "environment": "Complete project, Edge/Chromium, two independent browser contexts, shared MVCC SDK test double; no live Firebase or Rules execution",
+  "results": [
+    {
+      "name": "Full CMS startup and Advertising legacy document",
+      "result": "PASS"
+    },
+    {
+      "name": "Seed creation race: exactly one transaction accepted",
+      "result": "PASS"
+    },
+    {
+      "name": "Stale category save cannot remove concurrent new category",
+      "result": "PASS"
+    },
+    {
+      "name": "Catalog update preserves unrelated metadata and all original IDs",
+      "result": "PASS"
+    },
+    {
+      "name": "Concurrent creates: conflict rejected, refreshed retry appends uniquely",
+      "result": "PASS"
+    },
+    {
+      "name": "Independent categories/languages allow concurrent creates",
+      "result": "PASS"
+    },
+    {
+      "name": "Concurrent reorder transactions: one conflict, no partial order",
+      "result": "PASS"
+    },
+    {
+      "name": "Add/reorder race cannot omit the added lesson",
+      "result": "PASS"
+    },
+    {
+      "name": "Stale lesson editor cannot overwrite concurrent edit",
+      "result": "PASS"
+    },
+    {
+      "name": "Move between scopes locks source and destination, appends",
+      "result": "PASS"
+    },
+    {
+      "name": "Cross-scope and partial reorder rejected without any commit",
+      "result": "PASS"
+    },
+    {
+      "name": "Offline failure before commit retains request ID; retry creates once",
+      "result": "PASS"
+    },
+    {
+      "name": "Lost commit acknowledgement: refresh and repeat return same ID, one document",
+      "result": "PASS"
+    },
+    {
+      "name": "Pending create ID survives page reload after lost acknowledgement",
+      "result": "PASS"
+    },
+    {
+      "name": "Successful UI save followed by read failure cannot duplicate on repeat",
+      "result": "PASS"
+    },
+    {
+      "name": "Corrupted catalog never replaces loaded snapshot; writes blocked",
+      "result": "PASS"
+    },
+    {
+      "name": "Permission-denied catalog read never becomes missing/seed",
+      "result": "PASS"
+    },
+    {
+      "name": "Corrupted lesson is not partially loaded or silently discarded",
+      "result": "PASS"
+    },
+    {
+      "name": "Actual Firestore ID overrides legacy data.id",
+      "result": "PASS"
+    },
+    {
+      "name": "Duplicate IDs, orphan parent, cycles, and wrong catalog types rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "Depth 20 accepted; depth 21 and moved deep subtree rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "UI cannot save a category below depth 20",
+      "result": "PASS"
+    },
+    {
+      "name": "Removing an existing category rejected transactionally",
+      "result": "PASS"
+    },
+    {
+      "name": "Populated category reparent rejected by adapter",
+      "result": "PASS"
+    },
+    {
+      "name": "Concurrent add vs empty-category move cannot orphan lesson",
+      "result": "PASS"
+    },
+    {
+      "name": "Delete serializes order and blocks stale reorder",
+      "result": "PASS"
+    },
+    {
+      "name": "Real YouTube parser: watch/Shorts/live/embed/unlisted-style URLs and negatives",
+      "result": "PASS"
+    },
+    {
+      "name": "UI creates a nested translated category and preserves existing taxonomy",
+      "result": "PASS"
+    },
+    {
+      "name": "Draft, hidden category, filters, arrow UI and mobile navigation regression",
+      "result": "PASS"
+    },
+    {
+      "name": "UI deletes an old empty category with named confirmation",
+      "result": "PASS"
+    },
+    {
+      "name": "UI prevents populated and parent category deletion",
+      "result": "PASS"
+    },
+    {
+      "name": "UI cancellation keeps category; deletes new translated child and clears editor",
+      "result": "PASS"
+    },
+    {
+      "name": "Repeat deletion with stale revision rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "Quick Hide / Close / Open preserves all videos and category content",
+      "result": "PASS"
+    },
+    {
+      "name": "Quick close cancellation and duplicate click guard",
+      "result": "PASS"
+    },
+    {
+      "name": "Maintenance form save, reopen and parent restrictions",
+      "result": "PASS"
+    },
+    {
+      "name": "Stale availability edit rejected without overwriting latest status",
+      "result": "PASS"
+    },
+    {
+      "name": "Category controls stay within the mobile viewport",
+      "result": "PASS"
+    },
+    {
+      "name": "Spark build never imports the Cloud Functions SDK",
+      "result": "PASS"
+    },
+    {
+      "name": "Firestore map key order does not turn one status change into many changes",
+      "result": "PASS"
+    },
+    {
+      "name": "Promocodes UI generates only after confirmation, filters, exports and rotates universal code",
+      "result": "PASS"
+    },
+    {
+      "name": "Interrupted generation resumes the same code batch without duplicates",
+      "result": "PASS"
+    },
+    {
+      "name": "Actual admin repository generates 5000 unique codes in bounded transactions on fake backend",
+      "result": "PASS"
+    },
+    {
+      "name": "No unexpected JavaScript page errors",
+      "result": "PASS"
+    }
+  ],
+  "errors": []
+}

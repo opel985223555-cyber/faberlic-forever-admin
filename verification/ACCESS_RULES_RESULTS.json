@@ -1,0 +1,69 @@
+{
+  "environment": "Local demo Firestore only; no real codes or accounts created",
+  "results": [
+    {
+      "name": "5000 random codes are unique locally and canonical hashes match input formatting",
+      "result": "PASS"
+    },
+    {
+      "name": "Unauthenticated and unactivated clients cannot fetch lessons, material or taxonomy",
+      "result": "PASS"
+    },
+    {
+      "name": "Only admin can create or list codes and read plaintext secret book",
+      "result": "PASS"
+    },
+    {
+      "name": "One-time code activates atomically and enables only published content",
+      "result": "PASS"
+    },
+    {
+      "name": "Second installation cannot reuse consumed code",
+      "result": "PASS"
+    },
+    {
+      "name": "Fresh client with same authenticated installation keeps access",
+      "result": "PASS"
+    },
+    {
+      "name": "Two concurrent platforms redeem one code only once",
+      "result": "PASS"
+    },
+    {
+      "name": "Clients cannot assign access, spoof uid or claim without consuming code",
+      "result": "PASS"
+    },
+    {
+      "name": "Universal code works on Android/iOS and config pointer is private",
+      "result": "PASS"
+    },
+    {
+      "name": "Rotating universal code revokes earlier universal installations",
+      "result": "PASS"
+    },
+    {
+      "name": "Admin can block installation; client cannot unblock itself",
+      "result": "PASS"
+    },
+    {
+      "name": "Blocking consumed single code revokes content access",
+      "result": "PASS"
+    },
+    {
+      "name": "User can delete own access and private claim without making code reusable",
+      "result": "PASS"
+    },
+    {
+      "name": "Claim cannot be deleted while its installation still has access",
+      "result": "PASS"
+    },
+    {
+      "name": "Admin generation batch of 200 codes and checkpoint fits Firestore limits",
+      "result": "PASS"
+    },
+    {
+      "name": "Code state cannot be reset or plaintext secrets read by activated client",
+      "result": "PASS"
+    }
+  ]
+}

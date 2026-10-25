@@ -1,0 +1,348 @@
+// CMS-13 Spark: guarded inventory and transactional category mutations. Not deployed.
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function isAdmin() {
+   return request.auth != null
+    && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+    && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
+  }
+  function anonymousUser() { return request.auth != null && request.auth.token.firebase.sign_in_provider == 'anonymous'; }
+  function hashId(id) { return id is string && id.matches('^[a-f0-9]{64}$'); }
+  function hasAccess() {
+   let p = /databases/$(database)/documents/installations/$(request.auth.uid);
+   let code = get(/databases/$(database)/documents/promoCodes/$(get(p).data.codeHash)).data;
+   return request.auth != null && exists(p) && get(p).data.enabled == true && code.enabled == true
+    && ((code.kind == 'single' && code.state == 'used')
+      || (code.kind == 'universal' && get(/databases/$(database)/documents/accessConfig/universal).data.enabled == true
+       && get(/databases/$(database)/documents/accessConfig/universal).data.codeHash == get(p).data.codeHash));
+  }
+  function publicationCreate(d) {
+   return d.status != 'published' ? !('publishedAt' in d) : d.publishedAt == request.time;
+  }
+  function publicationUpdate(old,next) {
+   return 'publishedAt' in old ? next.publishedAt == old.publishedAt
+    : (!('publishedAt' in next) ? next.status != 'published' || old.status == 'published'
+       : (next.status == 'published' && next.publishedAt == request.time) || (old.status == 'published' && old.get('createdAt',null) is timestamp && next.publishedAt == old.createdAt));
+  }
+  function validId(id) { return id is string && id.size() > 0 && id.size() <= 512 && id.toUtf8().size() <= 1000 && !id.matches('.*[/].*'); }
+  function leaf(d) {
+   return d.get('leafCategoryId', null) != null ? d.leafCategoryId
+    : (d.categoryId in ['social','ranks'] && d.get('topicId', null) != null
+      ? d.categoryId + '__' + string(d.topicId) : d.categoryId);
+  }
+  function scopeId(d) { return leaf(d) + '~' + d.get('language','ru'); }
+  function advanced(id) {
+   let p = /databases/$(database)/documents/lessonOrderScopes/$(id);
+   return getAfter(p).data.revision == (exists(p) ? get(p).data.revision : 0) + 1;
+  }
+  function membershipAdvanced() {
+   let p = /databases/$(database)/documents/catalogGuards/membership;
+   return getAfter(p).data.protocol == 13
+    && getAfter(p).data.revision == (exists(p) ? get(p).data.revision : 0) + 1;
+  }
+  function membershipLinked(id) {
+   let p = /databases/$(database)/documents/catalogGuards/membership;
+   return membershipAdvanced() && getAfter(p).data.operation == 'lesson' && getAfter(p).data.lessonId == id;
+  }
+  function catalogLink(d) {
+   let p = /databases/$(database)/documents/taxonomy/catalog;
+   return getAfter(p).data.protocol == 13 && getAfter(p).data.roots[d.leafCategoryId] == d.categoryId;
+  }
+  function countAt(old, next, oldPath, newPath, id) {
+   let n = next.get(id,0);
+   return n is int && n >= 0 && n <= 9007199254740991
+    && n == old.get(id,0) + (id in newPath ? 1 : 0) - (id in oldPath ? 1 : 0);
+  }
+  function countIndex(old,next,oldPath,newPath,path,i) {
+   return path.size() <= i || countAt(old,next,oldPath,newPath,path[i]);
+  }
+  function pathCounts(old,next,oldPath,newPath) {
+   return oldPath.size() <= 1 && newPath.size() <= 1
+    && next.diff(old).affectedKeys().hasOnly(oldPath.concat(newPath))
+    && countIndex(old,next,oldPath,newPath,oldPath,0)
+    && countIndex(old,next,oldPath,newPath,newPath,0);
+  }
+  function guardLesson(d,oldCounts) {
+   let p = /databases/$(database)/documents/lessons/$(d.lessonId);
+   let had = exists(p);
+   let has = existsAfter(p);
+   let catalog = getAfter(/databases/$(database)/documents/taxonomy/catalog).data;
+   let oldPath = had ? [leaf(get(p).data)] : [];
+   let newPath = has ? [leaf(getAfter(p).data)] : [];
+   return validId(d.lessonId) && (had || has)
+    && (!had || !has || getAfter(p).data.revision == get(p).data.get('revision',0) + 1)
+    && pathCounts(oldCounts,d.counts,oldPath,newPath);
+  }
+  function guardCatalog() {
+   let p = /databases/$(database)/documents/taxonomy/catalog;
+   return getAfter(p).data.protocol == 13
+    && getAfter(p).data.revision == (exists(p) ? get(p).data.get('revision',0) : 0) + 1;
+  }
+  function childCounts(old,next,oldParent,newParent) {
+   return next.diff(old).affectedKeys().hasOnly([oldParent,newParent])
+    && (oldParent == '' || countAt(old,next,oldParent == '' ? [] : [oldParent],newParent == '' ? [] : [newParent],oldParent))
+    && (newParent == '' || countAt(old,next,oldParent == '' ? [] : [oldParent],newParent == '' ? [] : [newParent],newParent));
+  }
+  function parent(d) { return d.get('parentId',null) == null ? '' : d.parentId; }
+  function removedMap(old,next,id) {
+   return next.diff(old).removedKeys() == [id].toSet() && next.diff(old).addedKeys().size() == 0 && next.diff(old).changedKeys().size() == 0;
+  }
+  function catalogDelete(old,next,g) {
+   let i=next.mutation.index;
+   let node=old.items[i];
+   return i >= 0 && i < old.items.size()
+    && old.childCounts.get(node.id,0) == 0 && g.counts.get(node.id,0) == 0
+    && next.items == old.items.removeAll([node]) && next.ids == old.ids.removeAll([node.id])
+    && removedMap(old.roots,next.roots,node.id) && removedMap(old.paths,next.paths,node.id)
+    && childCounts(old.childCounts,next.childCounts,parent(node),'');
+  }
+  function catalogAdd(old,next) {
+   let i=next.mutation.index;
+   let node=next.items[i];
+   let p=parent(node);
+   return i == old.items.size() && validId(node.id) && !(node.id in old.ids)
+    && (p == '' || p in old.ids)
+    && next.items == old.items.concat([node]) && next.ids == old.ids.concat([node.id])
+    && next.roots.diff(old.roots).affectedKeys().hasOnly([node.id])
+    && next.paths.diff(old.paths).affectedKeys().hasOnly([node.id])
+    && next.roots[node.id] == (p == '' ? node.id : old.roots[p])
+    && next.paths[node.id] == (p == '' ? [node.id] : [node.id].concat(old.paths[p]))
+    && childCounts(old.childCounts,next.childCounts,'',p);
+  }
+  function catalogEdit(old,next,g) {
+   let i=next.mutation.index;
+   let a=old.items[i];
+   let b=next.items[i];
+   return i >= 0 && i < old.items.size() && next.ids == old.ids && next.items.size() == old.items.size()
+    && a.id == b.id && next.items.removeAll([b]) == old.items.removeAll([a])
+    && (parent(b) == '' || parent(b) in old.ids) && parent(b) != b.id
+    && (parent(a) == parent(b) || g.counts.get(a.id,0) == 0)
+    && (parent(a) != parent(b) || (next.roots == old.roots && next.paths == old.paths))
+    && childCounts(old.childCounts,next.childCounts,parent(a),parent(b));
+  }
+  function catalogReorder(old,next) {
+   let i=next.mutation.index;
+   let j=next.mutation.other;
+   let a=old.items[i];let b=old.items[j];let c=next.items[i];let d=next.items[j];
+   return i >= 0 && j >= 0 && i < old.items.size() && j < old.items.size() && i != j
+    && next.ids == old.ids && next.items.size() == old.items.size()
+    && a.id == c.id && b.id == d.id && parent(a) == parent(b)
+    && c.diff(a).affectedKeys().hasOnly(['order']) && d.diff(b).affectedKeys().hasOnly(['order'])
+    && next.items.removeAll([c,d]) == old.items.removeAll([a,b])
+    && next.roots == old.roots && next.paths == old.paths && next.childCounts == old.childCounts;
+  }
+  function validScope(d) {
+   return d.keys().hasAll(['leafCategoryId','language','revision','updatedAt'])
+    && d.keys().hasOnly(['leafCategoryId','language','revision','updatedAt'])
+    && validId(d.leafCategoryId) && d.language in ['ru','tj','uz']
+    && d.revision is int && d.revision > 0 && d.updatedAt == request.time;
+  }
+  function validLesson(d) {
+   return d.keys().hasAll(['title','youtubeId','categoryId','leafCategoryId','language','status','order','revision','orderScopeId','orderRevision','updatedAt'])
+    && d.title is string && d.title.trim().size() > 0 && d.title.size() <= 160
+    && d.youtubeId is string && d.youtubeId.matches('^[A-Za-z0-9_-]{11}$')
+    && validId(d.categoryId) && validId(d.leafCategoryId)
+    && d.language in ['ru','tj','uz'] && d.status in ['published','draft']
+    && d.order is int && d.order > 0 && d.revision is int && d.revision > 0
+    && d.orderRevision is int && d.orderRevision > 0
+    && (!('description' in d) || (d.description is string && d.description.size() <= 1200))
+    && (!('orientation' in d) || d.orientation in ['vertical','horizontal'])
+    && (!('youtubeUrl' in d) || d.youtubeUrl is string)
+    && d.orderScopeId == scopeId(d) && d.updatedAt == request.time;
+  }
+  function linkedScope(d) {
+   let p = /databases/$(database)/documents/lessonOrderScopes/$(d.orderScopeId);
+   return advanced(d.orderScopeId)
+    && getAfter(p).data.leafCategoryId == leaf(d)
+    && getAfter(p).data.language == d.language
+    && getAfter(p).data.revision == d.orderRevision;
+  }
+  function validCatalog(d) {
+   return d.keys().hasAll(['items','revision','version','updatedAt'])
+    && d.items is list && d.items.size() <= 1000
+    && d.revision is int && d.revision > 0 && d.version == 1
+    && d.updatedAt == request.time;
+  }
+  match /admins/{uid} {
+   allow get: if request.auth != null && request.auth.uid == uid;
+   allow list, create, update, delete: if false;
+  }
+  match /lessons/{lessonId} {
+   allow get, list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
+   allow create: if isAdmin() && validLesson(request.resource.data) && publicationCreate(request.resource.data)
+    && membershipLinked(lessonId) && catalogLink(request.resource.data)
+    && request.resource.data.revision == 1
+    && request.resource.data.clientRequestId == lessonId
+    && request.resource.data.createdAt == request.time
+    && linkedScope(request.resource.data);
+   allow update: if isAdmin() && validLesson(request.resource.data) && publicationUpdate(resource.data,request.resource.data)
+    && request.resource.data.revision == resource.data.get('revision',0) + 1
+    && request.resource.data.get('createdAt',null) == resource.data.get('createdAt',null)
+    && request.resource.data.get('clientRequestId',null) == resource.data.get('clientRequestId',null)
+    && linkedScope(request.resource.data)
+    && ((leaf(resource.data) == leaf(request.resource.data) && resource.data.categoryId == request.resource.data.categoryId) || (membershipLinked(lessonId) && catalogLink(request.resource.data)))
+    && (scopeId(resource.data) == scopeId(request.resource.data) || advanced(scopeId(resource.data)));
+   allow delete: if isAdmin() && advanced(scopeId(resource.data)) && membershipLinked(lessonId);
+  }
+  match /lessonOrderScopes/{id} {
+   allow read: if isAdmin();
+   allow create: if isAdmin() && validScope(request.resource.data)
+    && id == scopeId(request.resource.data) && request.resource.data.revision == 1;
+   allow update: if isAdmin() && validScope(request.resource.data)
+    && id == scopeId(request.resource.data)
+    && request.resource.data.leafCategoryId == resource.data.leafCategoryId
+    && request.resource.data.language == resource.data.language
+    && request.resource.data.revision == resource.data.revision + 1;
+   allow delete: if false;
+  }
+  match /catalogGuards/{id} {
+   allow read: if isAdmin();
+   allow create, update: if id == 'membership' && isAdmin()
+    && request.resource.data.keys().hasOnly(['protocol','revision','counts','operation','lessonId','updatedAt'])
+    && request.resource.data.protocol == 13 && request.resource.data.counts is map
+    && request.resource.data.revision is int && request.resource.data.revision > 0 && request.resource.data.revision <= 9007199254740991
+    && request.resource.data.revision == (exists(/databases/$(database)/documents/catalogGuards/$(id)) ? resource.data.revision : 0) + 1
+    && request.resource.data.updatedAt == request.time
+    && ((request.resource.data.operation == 'bootstrap'
+         && (!exists(/databases/$(database)/documents/catalogGuards/$(id)) || resource.data.get('protocol',0) != 13)
+         && guardCatalog())
+     || (resource.data.protocol == 13 && request.resource.data.operation == 'catalog'
+         && request.resource.data.counts == resource.data.counts && guardCatalog())
+     || (resource.data.protocol == 13 && request.resource.data.operation == 'lesson' && guardLesson(request.resource.data,resource.data.counts)));
+   allow delete: if false;
+  }
+  function indexCatalog(d) {
+   return validCatalog(d) && d.protocol == 13 && d.ids is list && d.ids.size() == d.items.size()
+    && d.ids.toSet().size() == d.ids.size() && d.roots is map && d.paths is map && d.childCounts is map
+    && d.mutation is map;
+  }
+  match /taxonomy/{docId} {
+   allow get: if docId == 'catalog' && (isAdmin() || hasAccess());
+   allow list, delete: if false;
+   allow create: if docId == 'catalog' && isAdmin() && indexCatalog(request.resource.data)
+    && request.resource.data.revision == 1 && request.resource.data.mutation.kind == 'bootstrap' && membershipAdvanced();
+   allow update: if docId == 'catalog' && isAdmin() && indexCatalog(request.resource.data)
+    && request.resource.data.revision == resource.data.get('revision',0) + 1 && membershipAdvanced()
+    && ((resource.data.get('protocol',0) != 13 && request.resource.data.mutation.kind == 'bootstrap' && request.resource.data.items == resource.data.items)
+     || (resource.data.protocol == 13
+      && ((request.resource.data.mutation.kind == 'delete' && catalogDelete(resource.data,request.resource.data,get(/databases/$(database)/documents/catalogGuards/membership).data))
+       || (request.resource.data.mutation.kind == 'add' && catalogAdd(resource.data,request.resource.data))
+       || (request.resource.data.mutation.kind == 'edit' && catalogEdit(resource.data,request.resource.data,get(/databases/$(database)/documents/catalogGuards/membership).data))
+       || (request.resource.data.mutation.kind == 'reorder' && catalogReorder(resource.data,request.resource.data)))));
+  }
+  // CMS10 independent live streams. Only published records can be queried by Android.
+  function validStream(d) {
+   return d.keys().hasAll(['title','youtubeId','host','description','language','phase','status','scheduledAtMs','revision','createdAt','updatedAt'])
+    && d.keys().hasOnly(['title','youtubeId','host','description','language','phase','status','scheduledAtMs','revision','createdAt','updatedAt'])
+    && d.title is string && d.title.size() > 0 && d.title.size() <= 160
+    && d.youtubeId is string && d.youtubeId.matches('^[A-Za-z0-9_-]{11}$')
+    && d.host is string && d.host.size() <= 100
+    && d.description is string && d.description.size() <= 1200
+    && d.language in ['ru','tj','uz']
+    && d.phase in ['scheduled','live','recorded']
+    && d.status in ['draft','published']
+    && d.scheduledAtMs is int && d.scheduledAtMs >= 0
+    && d.revision is int && d.revision > 0
+    && d.createdAt is timestamp && d.updatedAt == request.time;
+  }
+  function validMaterial(d) {
+   return d.keys().hasAll(['title','url','description','type','language','status','revision','createdAt','updatedAt'])
+    && d.keys().hasOnly(['title','url','description','type','language','status','revision','createdAt','updatedAt'])
+    && d.title is string && d.title.size() > 0 && d.title.size() <= 160
+    && d.url is string && d.url.size() <= 2000 && d.url.matches('^https://[^ ]+$')
+    && d.description is string && d.description.size() <= 1200
+    && d.type in ['checklist','pdf','presentation','instruction','link']
+    && d.language in ['ru','tj','uz']
+    && d.status in ['draft','published']
+    && d.revision is int && d.revision > 0
+    && d.createdAt is timestamp && d.updatedAt == request.time;
+  }
+  match /liveStreams/{streamId} {
+   allow get, list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
+   allow create: if isAdmin() && validStream(request.resource.data)
+      && request.resource.data.revision == 1
+      && request.resource.data.createdAt == request.time;
+   allow update: if isAdmin() && validStream(request.resource.data)
+      && request.resource.data.revision == resource.data.revision + 1
+      && request.resource.data.createdAt == resource.data.createdAt;
+   allow delete: if isAdmin();
+  }
+  match /materials/{materialId} {
+   allow get, list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
+   allow create: if isAdmin() && validMaterial(request.resource.data)
+      && request.resource.data.revision == 1
+      && request.resource.data.createdAt == request.time;
+   allow update: if isAdmin() && validMaterial(request.resource.data)
+      && request.resource.data.revision == resource.data.revision + 1
+      && request.resource.data.createdAt == resource.data.createdAt;
+   allow delete: if isAdmin();
+  }
+  function claimable(hash) {
+   let c = get(/databases/$(database)/documents/promoCodes/$(hash)).data;
+   return hashId(hash) && c.enabled == true
+    && ((c.kind == 'single' && c.state == 'free'
+       && getAfter(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'used'
+       && getAfter(/databases/$(database)/documents/promoClaims/$(hash)).data.uid == request.auth.uid)
+      || (c.kind == 'universal' && get(/databases/$(database)/documents/accessConfig/universal).data.enabled == true
+       && get(/databases/$(database)/documents/accessConfig/universal).data.codeHash == hash));
+  }
+  function validCode(d) {
+   return d.keys().hasOnly(['kind','state','enabled','createdAt','updatedAt','usedAt'])
+    && d.kind in ['single','universal'] && d.state == 'free' && d.enabled == true
+    && d.usedAt == null && d.createdAt == request.time && d.updatedAt == request.time;
+  }
+  match /promoCodes/{hash} {
+   allow get: if request.auth != null;
+   allow list: if isAdmin();
+   allow create: if isAdmin() && hashId(hash) && validCode(request.resource.data);
+   allow update: if (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['enabled','updatedAt'])
+       && request.resource.data.enabled is bool && request.resource.data.updatedAt == request.time)
+    || (anonymousUser() && resource.data.kind == 'single' && resource.data.enabled == true && resource.data.state == 'free'
+       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state','usedAt','updatedAt'])
+       && request.resource.data.state == 'used' && request.resource.data.usedAt == request.time && request.resource.data.updatedAt == request.time
+       && getAfter(/databases/$(database)/documents/promoClaims/$(hash)).data.uid == request.auth.uid
+       && getAfter(/databases/$(database)/documents/installations/$(request.auth.uid)).data.codeHash == hash);
+   allow delete: if false;
+  }
+  match /promoSecrets/{hash} {
+   allow read: if isAdmin();
+   allow create: if isAdmin() && hashId(hash) && request.resource.data.keys().hasOnly(['code','createdAt'])
+    && request.resource.data.code is string && request.resource.data.code.matches('^FF(-[A-HJ-NP-Z2-9]{4}){4}$') && request.resource.data.createdAt == request.time;
+   allow update: if false;
+   allow delete: if isAdmin();
+  }
+  match /promoClaims/{hash} {
+   allow get: if isAdmin() || (request.auth != null && (!exists(/databases/$(database)/documents/promoClaims/$(hash)) || resource.data.uid == request.auth.uid));
+   allow list: if isAdmin();
+   allow create: if anonymousUser() && hashId(hash) && request.resource.data.keys().hasOnly(['uid','createdAt'])
+    && request.resource.data.uid == request.auth.uid && request.resource.data.createdAt == request.time
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.kind == 'single'
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'free'
+    && getAfter(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'used'
+    && getAfter(/databases/$(database)/documents/installations/$(request.auth.uid)).data.codeHash == hash;
+   allow update: if false;
+   allow delete: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid && !existsAfter(/databases/$(database)/documents/installations/$(request.auth.uid)));
+  }
+  match /installations/{uid} {
+   allow get: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+   allow list: if isAdmin();
+   allow create: if anonymousUser() && request.auth.uid == uid
+    && request.resource.data.keys().hasOnly(['codeHash','enabled','platform','installationHash','activatedAt','updatedAt'])
+    && request.resource.data.enabled == true && request.resource.data.platform in ['android','ios']
+    && hashId(request.resource.data.installationHash) && request.resource.data.activatedAt == request.time && request.resource.data.updatedAt == request.time
+    && claimable(request.resource.data.codeHash);
+   allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['enabled','updatedAt'])
+    && request.resource.data.enabled is bool && request.resource.data.updatedAt == request.time;
+   allow delete: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+  }
+  match /accessConfig/{id} {
+   allow read: if isAdmin();
+   allow create, update: if id == 'universal' && isAdmin() && request.resource.data.keys().hasOnly(['codeHash','enabled','updatedAt'])
+    && hashId(request.resource.data.codeHash) && request.resource.data.enabled is bool && request.resource.data.updatedAt == request.time;
+   allow delete: if false;
+  }
+  match /promoBatches/{id} { allow read, write: if isAdmin(); }
+  match /{document=**} { allow read, write: if false; }
+ }
+}

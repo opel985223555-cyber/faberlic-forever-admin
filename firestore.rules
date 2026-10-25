@@ -7,6 +7,24 @@ service cloud.firestore {
     && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
     && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true;
   }
+  function anonymousUser() { return request.auth != null && request.auth.token.firebase.sign_in_provider == 'anonymous'; }
+  function hashId(id) { return id is string && id.matches('^[a-f0-9]{64}$'); }
+  function hasAccess() {
+   let p = /databases/$(database)/documents/installations/$(request.auth.uid);
+   let code = get(/databases/$(database)/documents/promoCodes/$(get(p).data.codeHash)).data;
+   return request.auth != null && exists(p) && get(p).data.enabled == true && code.enabled == true
+    && ((code.kind == 'single' && code.state == 'used')
+      || (code.kind == 'universal' && get(/databases/$(database)/documents/accessConfig/universal).data.enabled == true
+       && get(/databases/$(database)/documents/accessConfig/universal).data.codeHash == get(p).data.codeHash));
+  }
+  function publicationCreate(d) {
+   return d.status != 'published' ? !('publishedAt' in d) : d.publishedAt == request.time;
+  }
+  function publicationUpdate(old,next) {
+   return 'publishedAt' in old ? next.publishedAt == old.publishedAt
+    : (!('publishedAt' in next) ? next.status != 'published' || old.status == 'published'
+       : (next.status == 'published' && next.publishedAt == request.time) || (old.status == 'published' && old.get('createdAt',null) is timestamp && next.publishedAt == old.createdAt));
+  }
   function validId(id) { return id is string && id.size() > 0 && id.size() <= 512 && id.toUtf8().size() <= 1000 && !id.matches('.*[/].*'); }
   function leaf(d) {
    return d.get('leafCategoryId', null) != null ? d.leafCategoryId
@@ -151,14 +169,14 @@ service cloud.firestore {
    allow list, create, update, delete: if false;
   }
   match /lessons/{lessonId} {
-   allow get, list: if isAdmin() || resource.data.status == 'published';
-   allow create: if isAdmin() && validLesson(request.resource.data)
+   allow get, list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
+   allow create: if isAdmin() && validLesson(request.resource.data) && publicationCreate(request.resource.data)
     && membershipLinked(lessonId) && catalogLink(request.resource.data)
     && request.resource.data.revision == 1
     && request.resource.data.clientRequestId == lessonId
     && request.resource.data.createdAt == request.time
     && linkedScope(request.resource.data);
-   allow update: if isAdmin() && validLesson(request.resource.data)
+   allow update: if isAdmin() && validLesson(request.resource.data) && publicationUpdate(resource.data,request.resource.data)
     && request.resource.data.revision == resource.data.get('revision',0) + 1
     && request.resource.data.get('createdAt',null) == resource.data.get('createdAt',null)
     && request.resource.data.get('clientRequestId',null) == resource.data.get('clientRequestId',null)
@@ -200,7 +218,7 @@ service cloud.firestore {
     && d.mutation is map;
   }
   match /taxonomy/{docId} {
-   allow get: if docId == 'catalog';
+   allow get: if docId == 'catalog' && (isAdmin() || hasAccess());
    allow list, delete: if false;
    allow create: if docId == 'catalog' && isAdmin() && indexCatalog(request.resource.data)
     && request.resource.data.revision == 1 && request.resource.data.mutation.kind == 'bootstrap' && membershipAdvanced();
@@ -241,7 +259,7 @@ service cloud.firestore {
     && d.createdAt is timestamp && d.updatedAt == request.time;
   }
   match /liveStreams/{streamId} {
-   allow get, list: if isAdmin() || resource.data.status == 'published';
+   allow get, list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
    allow create: if isAdmin() && validStream(request.resource.data)
       && request.resource.data.revision == 1
       && request.resource.data.createdAt == request.time;
@@ -251,7 +269,7 @@ service cloud.firestore {
    allow delete: if isAdmin();
   }
   match /materials/{materialId} {
-   allow get, list: if isAdmin() || resource.data.status == 'published';
+   allow get, list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
    allow create: if isAdmin() && validMaterial(request.resource.data)
       && request.resource.data.revision == 1
       && request.resource.data.createdAt == request.time;
@@ -260,6 +278,71 @@ service cloud.firestore {
       && request.resource.data.createdAt == resource.data.createdAt;
    allow delete: if isAdmin();
   }
+  function claimable(hash) {
+   let c = get(/databases/$(database)/documents/promoCodes/$(hash)).data;
+   return hashId(hash) && c.enabled == true
+    && ((c.kind == 'single' && c.state == 'free'
+       && getAfter(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'used'
+       && getAfter(/databases/$(database)/documents/promoClaims/$(hash)).data.uid == request.auth.uid)
+      || (c.kind == 'universal' && get(/databases/$(database)/documents/accessConfig/universal).data.enabled == true
+       && get(/databases/$(database)/documents/accessConfig/universal).data.codeHash == hash));
+  }
+  function validCode(d) {
+   return d.keys().hasOnly(['kind','state','enabled','createdAt','updatedAt','usedAt'])
+    && d.kind in ['single','universal'] && d.state == 'free' && d.enabled == true
+    && d.usedAt == null && d.createdAt == request.time && d.updatedAt == request.time;
+  }
+  match /promoCodes/{hash} {
+   allow get: if request.auth != null;
+   allow list: if isAdmin();
+   allow create: if isAdmin() && hashId(hash) && validCode(request.resource.data);
+   allow update: if (isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['enabled','updatedAt'])
+       && request.resource.data.enabled is bool && request.resource.data.updatedAt == request.time)
+    || (anonymousUser() && resource.data.kind == 'single' && resource.data.enabled == true && resource.data.state == 'free'
+       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state','usedAt','updatedAt'])
+       && request.resource.data.state == 'used' && request.resource.data.usedAt == request.time && request.resource.data.updatedAt == request.time
+       && getAfter(/databases/$(database)/documents/promoClaims/$(hash)).data.uid == request.auth.uid
+       && getAfter(/databases/$(database)/documents/installations/$(request.auth.uid)).data.codeHash == hash);
+   allow delete: if false;
+  }
+  match /promoSecrets/{hash} {
+   allow read: if isAdmin();
+   allow create: if isAdmin() && hashId(hash) && request.resource.data.keys().hasOnly(['code','createdAt'])
+    && request.resource.data.code is string && request.resource.data.code.matches('^FF(-[A-HJ-NP-Z2-9]{4}){4}$') && request.resource.data.createdAt == request.time;
+   allow update: if false;
+   allow delete: if isAdmin();
+  }
+  match /promoClaims/{hash} {
+   allow get: if isAdmin() || (request.auth != null && (!exists(/databases/$(database)/documents/promoClaims/$(hash)) || resource.data.uid == request.auth.uid));
+   allow list: if isAdmin();
+   allow create: if anonymousUser() && hashId(hash) && request.resource.data.keys().hasOnly(['uid','createdAt'])
+    && request.resource.data.uid == request.auth.uid && request.resource.data.createdAt == request.time
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.kind == 'single'
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'free'
+    && getAfter(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'used'
+    && getAfter(/databases/$(database)/documents/installations/$(request.auth.uid)).data.codeHash == hash;
+   allow update: if false;
+   allow delete: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid && !existsAfter(/databases/$(database)/documents/installations/$(request.auth.uid)));
+  }
+  match /installations/{uid} {
+   allow get: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+   allow list: if isAdmin();
+   allow create: if anonymousUser() && request.auth.uid == uid
+    && request.resource.data.keys().hasOnly(['codeHash','enabled','platform','installationHash','activatedAt','updatedAt'])
+    && request.resource.data.enabled == true && request.resource.data.platform in ['android','ios']
+    && hashId(request.resource.data.installationHash) && request.resource.data.activatedAt == request.time && request.resource.data.updatedAt == request.time
+    && claimable(request.resource.data.codeHash);
+   allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['enabled','updatedAt'])
+    && request.resource.data.enabled is bool && request.resource.data.updatedAt == request.time;
+   allow delete: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+  }
+  match /accessConfig/{id} {
+   allow read: if isAdmin();
+   allow create, update: if id == 'universal' && isAdmin() && request.resource.data.keys().hasOnly(['codeHash','enabled','updatedAt'])
+    && hashId(request.resource.data.codeHash) && request.resource.data.enabled is bool && request.resource.data.updatedAt == request.time;
+   allow delete: if false;
+  }
+  match /promoBatches/{id} { allow read, write: if isAdmin(); }
   match /{document=**} { allow read, write: if false; }
  }
 }
