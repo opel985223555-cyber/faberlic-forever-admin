@@ -2,19 +2,21 @@
 (() => {
  const A=window.FFAdmin;
  A.setMode=async(mode,user=null)=>{
-   A.state.mode=mode;A.state.currentUser=user;
+   A.state.mode=mode;A.state.currentUser=user;A.setSidebar(false);
    A.$('#login-screen').hidden=!!mode;A.$('#admin-shell').hidden=!mode;
    A.$('#mode-pill').textContent='Firebase · защищённый доступ';
    A.$('#operator').textContent=user?.email||'—';
    if(mode){try{await A.repo.refresh();A.navigate('overview')}catch(e){A.notify('Ошибка загрузки уроков: '+e.message,'error')}}
  };
+ A.setSidebar=open=>{A.$('#sidebar').classList.toggle('open',open);A.$('#sidebar-backdrop').hidden=!open;A.$('#open-sidebar').setAttribute('aria-expanded',String(open));document.body.classList.toggle('sidebar-visible',open);if(open)A.$('#close-sidebar').focus();};
  A.navigate=(section)=>{
    A.state.section=section;
    A.$$('.nav-button').forEach(btn=>btn.classList.toggle('active',btn.dataset.page===section));
    A.$$('.module-view').forEach(el=>el.hidden=el.dataset.module!==section);
    const headings={overview:'Обзор',videos:'Видеоуроки',categories:'Категории',ranks:'Обучение по статусам',promocodes:'Промокоды',materials:'Материалы',settings:'Настройки'};
    A.$('#page-title').textContent=headings[section]||'Админ-панель';
-   A.$('#sidebar').classList.remove('open');
+   A.setSidebar(false);
+   if(window.matchMedia('(max-width:760px)').matches)window.scrollTo({top:0,behavior:'instant'});
    if(A.modules[section]?.render)A.modules[section].render();
  };
  A.modules={};

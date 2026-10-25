@@ -63,7 +63,7 @@
     },
     {
       "platform": "android",
-      "name": "Revoked state clears private UI; account deletion clears history and old favorites",
+      "name": "Revoked state clears private UI and no account deletion controls are exposed",
       "result": "PASS"
     },
     {
@@ -133,7 +133,7 @@
     },
     {
       "platform": "ios",
-      "name": "Revoked state clears private UI; account deletion clears history and old favorites",
+      "name": "Revoked state clears private UI and no account deletion controls are exposed",
       "result": "PASS"
     },
     {

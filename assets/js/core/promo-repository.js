@@ -6,7 +6,7 @@
  const jobKey=()=> 'ff-invite-job:'+A.state.currentUser?.uid;
  A.promoRepo={
   pendingCount(){try{return JSON.parse(sessionStorage.getItem(jobKey())||'null')?.codes?.length||0;}catch{return 0;}},
-  async list(){const {store,db}=api();const r=await Promise.all(['promoCodes','promoSecrets','promoClaims','installations'].map(n=>store.getDocsFromServer(store.collection(db,n))));return {codes:rows(r[0]),secrets:rows(r[1]),claims:rows(r[2]),installations:rows(r[3])};},
+  async list(){const {store,db}=api();const r=await Promise.all(['promoCodes','promoSecrets','promoClaims','installations','promoDistribution'].map(n=>store.getDocsFromServer(store.collection(db,n))));return {codes:rows(r[0]),secrets:rows(r[1]),claims:rows(r[2]),installations:rows(r[3]),distribution:rows(r[4])};},
   async generate(count,onProgress){
    const {store,db}=api();if(!Number.isInteger(count)||count<1||count>5000)throw Error('Укажите количество от 1 до 5000');
    let job;try{job=JSON.parse(sessionStorage.getItem(jobKey())||'null');}catch{}
@@ -17,7 +17,12 @@
      for(const item of job.codes.slice(start,end)){tx.set(store.doc(db,'promoCodes',item.id),{kind:'single',state:'free',enabled:true,createdAt:store.serverTimestamp(),updatedAt:store.serverTimestamp(),usedAt:null});tx.set(store.doc(db,'promoSecrets',item.id),{code:item.code,createdAt:store.serverTimestamp()});}
      tx.set(ref,{total:job.codes.length,cursor:end,updatedAt:store.serverTimestamp()});});onProgress?.(end,job.codes.length);
    }
-   sessionStorage.removeItem(jobKey());return job.codes.length;
+   sessionStorage.removeItem(jobKey());this.lastGeneratedIds=job.codes.map(x=>x.id);return job.codes.length;
+  },
+  async issue(ids){const {store,db}=api();if(!Array.isArray(ids)||ids.length<1||ids.length>10||new Set(ids).size!==ids.length)throw Error('Выберите от 1 до 10 разных кодов');const groupId=crypto.randomUUID();
+   await store.runTransaction(db,async tx=>{const snapshots=[];for(const id of ids){if(!/^[a-f0-9]{64}$/.test(id))throw Error('Некорректный код');snapshots.push({id,code:await tx.get(store.doc(db,'promoCodes',id)),issued:await tx.get(store.doc(db,'promoDistribution',id))});}
+    for(const {code,issued} of snapshots){if(!code.exists()||code.data().kind!=='single'||code.data().state!=='free'||!code.data().enabled)throw Error('Один из кодов уже активирован или заблокирован. Обновите список.');if(issued.exists())throw Error('Один из кодов уже выдан другим администратором. Обновите список.');}
+    for(const {id} of snapshots)tx.set(store.doc(db,'promoDistribution',id),{groupId,issuedAt:store.serverTimestamp()});});return groupId;
   },
   async universal(){const {store,db}=api(),code=FFInvite.generate(),id=await FFInvite.hash(code),ref=store.doc(db,'accessConfig','universal');
    await store.runTransaction(db,async tx=>{const snap=await tx.get(ref),old=snap.exists()?snap.data().codeHash:null;if(old)tx.update(store.doc(db,'promoCodes',old),{enabled:false,updatedAt:store.serverTimestamp()});tx.set(store.doc(db,'promoCodes',id),{kind:'universal',state:'free',enabled:true,usedAt:null,createdAt:store.serverTimestamp(),updatedAt:store.serverTimestamp()});tx.set(store.doc(db,'promoSecrets',id),{code,createdAt:store.serverTimestamp()});tx.set(ref,{codeHash:id,enabled:true,updatedAt:store.serverTimestamp()});});return code;

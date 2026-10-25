@@ -1,0 +1,14 @@
+Если вы уже опубликовали предыдущие правила UPDATED, добавьте этот блок внутри match /databases/{database}/documents перед match /promoBatches/{id}, затем Publish. Если сомневаетесь, замените правила целиком из FIRESTORE_RULES_UPDATED.txt.
+
+  match /promoDistribution/{hash} {
+   allow read: if isAdmin();
+   allow create: if isAdmin() && hashId(hash)
+    && request.resource.data.keys().hasOnly(['groupId','issuedAt'])
+    && request.resource.data.groupId is string
+    && request.resource.data.groupId.matches('^[a-f0-9-]{36}$')
+    && request.resource.data.issuedAt == request.time
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.kind == 'single'
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'free'
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.enabled == true;
+   allow update, delete: if false;
+  }

@@ -70,6 +70,18 @@
       "result": "PASS"
     },
     {
+      "name": "Issuance is admin-only, private and immutable; it does not activate the code",
+      "result": "PASS"
+    },
+    {
+      "name": "Ten-code issuance fits Rules access limits and a partly invalid group writes nothing",
+      "result": "PASS"
+    },
+    {
+      "name": "Consumed and universal codes cannot be issued as fresh single-use codes",
+      "result": "PASS"
+    },
+    {
       "name": "Code state cannot be reset or plaintext secrets read by activated client",
       "result": "PASS"
     }

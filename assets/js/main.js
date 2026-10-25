@@ -4,7 +4,7 @@
  const boot=async()=>{
   A.modules.videos.init();A.modules.categories.init();A.modules.materials.init();A.modules.promocodes.init();
   A.$$('.nav-button').forEach(btn=>A.$on(btn,'click',()=>A.navigate(btn.dataset.page)));
-  A.$on(A.$('#open-sidebar'),'click',()=>A.$('#sidebar').classList.toggle('open'));
+  A.$on(A.$('#open-sidebar'),'click',()=>A.setSidebar(!A.$('#sidebar').classList.contains('open')));
   A.$on(A.$('#log-out'),'click',async()=>{try{await A.firebase.signOut();}finally{await A.setMode('');}});
   A.$on(A.$('#login-form'),'submit',async(e)=>{
    e.preventDefault();

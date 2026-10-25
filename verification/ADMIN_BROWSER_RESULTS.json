@@ -166,6 +166,18 @@
       "result": "PASS"
     },
     {
+      "name": "Centered in-page generation dialog supports cancel and Escape without writing codes",
+      "result": "PASS"
+    },
+    {
+      "name": "Copy single and universal codes uses exact plaintext and preserves code state",
+      "result": "PASS"
+    },
+    {
+      "name": "Copy falls back on denied clipboard permission and reports only successful copy",
+      "result": "PASS"
+    },
+    {
       "name": "Admin can cancel or reset an installation without resetting its consumed code",
       "result": "PASS"
     },
@@ -179,6 +191,26 @@
     },
     {
       "name": "Actual admin repository generates 5000 unique codes in bounded transactions on fake backend",
+      "result": "PASS"
+    },
+    {
+      "name": "Five new codes are automatically selected, issued atomically and copied as five separate lines",
+      "result": "PASS"
+    },
+    {
+      "name": "Counters distinguish issued, remaining and activated; repeat group copy does not double count",
+      "result": "PASS"
+    },
+    {
+      "name": "Two admins cannot issue the same code twice; disabled and activated codes are rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "Failed clipboard keeps issued group recoverable without issuing again",
+      "result": "PASS"
+    },
+    {
+      "name": "Phone navigation, forms, code actions and centered dialog fit 390 and 320 pixel widths",
       "result": "PASS"
     },
     {

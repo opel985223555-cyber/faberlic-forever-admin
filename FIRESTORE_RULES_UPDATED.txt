@@ -342,6 +342,18 @@ service cloud.firestore {
     && hashId(request.resource.data.codeHash) && request.resource.data.enabled is bool && request.resource.data.updatedAt == request.time;
    allow delete: if false;
   }
+  match /promoDistribution/{hash} {
+   allow read: if isAdmin();
+   allow create: if isAdmin() && hashId(hash)
+    && request.resource.data.keys().hasOnly(['groupId','issuedAt'])
+    && request.resource.data.groupId is string
+    && request.resource.data.groupId.matches('^[a-f0-9-]{36}$')
+    && request.resource.data.issuedAt == request.time
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.kind == 'single'
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.state == 'free'
+    && get(/databases/$(database)/documents/promoCodes/$(hash)).data.enabled == true;
+   allow update, delete: if false;
+  }
   match /promoBatches/{id} { allow read, write: if isAdmin(); }
   match /{document=**} { allow read, write: if false; }
  }
