@@ -62,6 +62,13 @@ await test('Map field order is ignored by real SDK no-op and maintenance save',a
  const access=require('../assets/js/core/category-availability');await save(reordered.map(x=>x.id==='old'?access.apply(x,'maintenance'):x),a,snapshot);
  assert.equal((await db.doc('taxonomy/catalog').get()).data().items.find(x=>x.id==='old').closureReason,'maintenance');assert((await db.doc('lessons/l0').get()).exists);
 });
+await test('Category icon create/read/edit persists with real SDK and preserves all translations and lesson bindings',async()=>{
+ await reset(tree,[legacy('old')]);await ready();let state=await a.firebase.readSnapshot();const node={id:'icon_category',parentId:null,name:{ru:'Instagram',tj:'Инстаграм',uz:'Инстаграм'},description:{ru:'RU',tj:'TJ',uz:'UZ'},status:'active',order:9,icon:'brand:instagram'};await save(state.catalog.concat([node]),a,state);
+ const restored=client(env.authenticatedContext('admin').firestore());state=await restored.firebase.readSnapshot();assert.equal(state.catalog.find(x=>x.id==='icon_category').icon,'brand:instagram');await save(state.catalog.map(x=>x.id==='icon_category'?{...x,icon:'brand:telegram'}:x),restored,state);const stored=(await db.doc('taxonomy/catalog').get()).data().items.find(x=>x.id==='icon_category');assert.equal(stored.icon,'brand:telegram');assert.deepEqual(stored.name,node.name);assert.deepEqual(stored.description,node.description);assert.equal((await db.doc('lessons/l0').get()).data().categoryId,'old');
+});
+await test('Concurrent icon edit rejects stale save and populated category can change only its icon safely',async()=>{
+ await reset(tree,[legacy('old')]);await ready();const left=await a.firebase.readSnapshot(),right=await b.firebase.readSnapshot();await save(left.catalog.map(x=>x.id==='old'?{...x,icon:'brand:instagram'}:x),a,left);await assert.rejects(save(right.catalog.map(x=>x.id==='old'?{...x,icon:'lucide:users'}:x),b,right));assert.equal((await db.doc('taxonomy/catalog').get()).data().items.find(x=>x.id==='old').icon,'brand:instagram');assert((await db.doc('lessons/l0').get()).exists);
+});
 await test('First publication timestamp survives unpublish, republish and manual order',async()=>{
  await reset();await ready();let state=await a.firebase.readSnapshot();const id=await a.firebase.upsertLesson(payload('old'),null,state);let value=(await db.doc('lessons/'+id).get()).data();assert(!value.publishedAt);
  state=await a.firebase.readSnapshot();await a.firebase.upsertLesson({...payload('old'),status:'published'},id,state);value=(await db.doc('lessons/'+id).get()).data();const first=value.publishedAt.toMillis();assert(first>0);

@@ -1,0 +1,36 @@
+{
+  "admin": [
+    "assets/css/icon-picker.css",
+    "assets/js/core/category-icons.js",
+    "assets/js/core/icon-picker.js",
+    "assets/js/modules/categories.js",
+    "index.html",
+    "licenses/CATEGORY_ICONS.md",
+    "licenses/LUCIDE_LICENSE.txt",
+    "licenses/SIMPLE_ICONS_LICENSE.txt",
+    "verification/ADMIN_BROWSER_RESULTS.json",
+    "verification/CATALOG_AND_PUBLICATION_RESULTS.json",
+    "verification/test_admin_browser.cjs",
+    "verification/test_catalog_publication.cjs"
+  ],
+  "android": [
+    "app/src/main/assets/www/core/category-icons.js",
+    "app/src/main/assets/www/index.html",
+    "app/src/main/assets/www/modules/categories-cms.js",
+    "app/src/main/assets/www/modules/category-icons.css",
+    "licenses/CATEGORY_ICONS.md",
+    "licenses/LUCIDE_LICENSE.txt",
+    "licenses/SIMPLE_ICONS_LICENSE.txt",
+    "verification/test_mobile_browser.cjs"
+  ],
+  "ios": [
+    "FaberlicForever/Web/core/category-icons.js",
+    "FaberlicForever/Web/index.html",
+    "FaberlicForever/Web/modules/categories-cms.js",
+    "FaberlicForever/Web/modules/category-icons.css",
+    "licenses/CATEGORY_ICONS.md",
+    "licenses/LUCIDE_LICENSE.txt",
+    "licenses/SIMPLE_ICONS_LICENSE.txt",
+    "verification/test_mobile_browser.cjs"
+  ]
+}

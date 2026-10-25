@@ -1,0 +1,482 @@
+[
+  {
+    "id": "brand:instagram",
+    "name": "Instagram",
+    "group": "Социальные сети",
+    "kind": "brand"
+  },
+  {
+    "id": "brand:tiktok",
+    "name": "TikTok",
+    "group": "Социальные сети",
+    "kind": "brand"
+  },
+  {
+    "id": "brand:telegram",
+    "name": "Telegram",
+    "group": "Социальные сети",
+    "kind": "brand"
+  },
+  {
+    "id": "brand:whatsapp",
+    "name": "WhatsApp",
+    "group": "Социальные сети",
+    "kind": "brand"
+  },
+  {
+    "id": "brand:youtube",
+    "name": "YouTube",
+    "group": "Социальные сети",
+    "kind": "brand"
+  },
+  {
+    "id": "brand:facebook",
+    "name": "Facebook",
+    "group": "Социальные сети",
+    "kind": "brand"
+  },
+  {
+    "id": "lucide:badge-dollar-sign",
+    "name": "Продажи",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:shopping-bag",
+    "name": "Покупки",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:shopping-cart",
+    "name": "Корзина",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:package",
+    "name": "Заказы",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:contact-round",
+    "name": "Клиенты",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:user-plus",
+    "name": "Рекрутинг",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:users",
+    "name": "Команда",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:crown",
+    "name": "Лидеры",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:handshake",
+    "name": "Партнёры",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:trending-up",
+    "name": "Доход",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:banknote",
+    "name": "Деньги",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:wallet",
+    "name": "Кошелёк",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:badge-plus",
+    "name": "Бонусы",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:gift",
+    "name": "Подарки",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:ticket-percent",
+    "name": "Акции",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:percent",
+    "name": "Скидки",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:trophy",
+    "name": "Достижения",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:medal",
+    "name": "Рейтинг",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:chart-no-axes-combined",
+    "name": "Рост",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:chart-column",
+    "name": "Статистика",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:target",
+    "name": "Цели",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:clipboard-list",
+    "name": "Планирование",
+    "group": "Продажи и бизнес",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:graduation-cap",
+    "name": "Обучение",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:sprout",
+    "name": "Новичку",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:notebook-pen",
+    "name": "Уроки",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:circle-play",
+    "name": "Видеоуроки",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:book-open",
+    "name": "Книги",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:list-checks",
+    "name": "Инструкции",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:presentation",
+    "name": "Презентации",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:file-text",
+    "name": "Документы",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:files",
+    "name": "Материалы",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:clipboard-check",
+    "name": "Тесты",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:lightbulb",
+    "name": "Советы",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:circle-help",
+    "name": "Вопросы",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:award",
+    "name": "Сертификаты",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:flame",
+    "name": "Мотивация",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:brain",
+    "name": "Развитие",
+    "group": "Обучение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:radio",
+    "name": "Эфиры",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:video",
+    "name": "Видео",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:camera",
+    "name": "Камера",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:image",
+    "name": "Фото",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:mic",
+    "name": "Микрофон",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:podcast",
+    "name": "Подкасты",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:message-square",
+    "name": "Сообщения",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:phone",
+    "name": "Звонки",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:messages-square",
+    "name": "Чат",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:bell",
+    "name": "Уведомления",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:megaphone",
+    "name": "Реклама",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:rocket",
+    "name": "Продвижение",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:clapperboard",
+    "name": "Reels",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:gallery-vertical-end",
+    "name": "Stories",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:panels-top-left",
+    "name": "Контент",
+    "group": "Медиа и общение",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:house",
+    "name": "Главная",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:layout-dashboard",
+    "name": "Личный кабинет",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:user-round",
+    "name": "Профиль",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:settings",
+    "name": "Настройки",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:star",
+    "name": "Избранное",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:search",
+    "name": "Поиск",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:calendar-days",
+    "name": "Календарь",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:clock",
+    "name": "Время",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:link",
+    "name": "Ссылки",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:globe",
+    "name": "Интернет",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:smartphone",
+    "name": "Смартфон",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:monitor",
+    "name": "Компьютер",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:shield-check",
+    "name": "Безопасность",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "lucide:folder",
+    "name": "Другое",
+    "group": "Общие",
+    "kind": "line"
+  },
+  {
+    "id": "spark",
+    "name": "Искра",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  },
+  {
+    "id": "bars",
+    "name": "Диаграмма",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  },
+  {
+    "id": "users",
+    "name": "Клиенты — прежний значок",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  },
+  {
+    "id": "diamond",
+    "name": "Бриллиант",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  },
+  {
+    "id": "heart",
+    "name": "Сердце",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  },
+  {
+    "id": "screen",
+    "name": "Экран",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  },
+  {
+    "id": "trophy",
+    "name": "Кубок — прежний значок",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  },
+  {
+    "id": "team",
+    "name": "Команда — прежний значок",
+    "group": "Прежние значки",
+    "kind": "legacy"
+  }
+]

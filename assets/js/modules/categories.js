@@ -2,7 +2,9 @@
 (()=>{
  const A=window.FFAdmin;
  const availability=A.categoryAvailability;
- let editingRevision;
+ let editingRevision,iconPicker;
+ function setIcon(id){A.$('#category-icon').value=typeof id==='string'?id:FFIcons.defaultId;const raw=A.$('#category-icon').value,holder=A.$('#category-icon-preview');holder.innerHTML=FFIcons.render(raw);const label=document.createElement('span');label.textContent=FFIcons.has(raw)?FFIcons.get(raw).name:'Стандартная категория';holder.append(label);}
+
  const seed=()=>Array.isArray(window.FF_CATALOG_DEFAULTS)
    ? structuredClone(window.FF_CATALOG_DEFAULTS)
    : A.categories.map(([id,title],i)=>({id,parentId:null,name:{ru:title},description:{ru:''},status:'active',order:i+1}));
@@ -20,11 +22,11 @@
  // Hidden and 'soon' sections must remain selectable by the administrator, especially when editing an existing lesson.
  function listOptions(){const ordered=[],visited=new Set();function visit(parent,depth=0){if(depth>20)return;for(const x of children(parent)){if(visited.has(x.id))continue;visited.add(x.id);const suffix=x.status==='hidden'?' [Скрыт]':availability.mode(x)==='maintenance'?' [Техническое обслуживание]':x.status==='soon'?' [Скоро]':'';ordered.push([x.id,breadcrumb(x.id)+suffix]);visit(x.id,depth+1);}}visit(null);return ordered;}
  const selectHTML=(selected='newbie')=>listOptions().map(([id,l])=>`<option value="${A.escape(id)}" ${selected===id?'selected':''}>${A.escape(l)}</option>`).join('');
- function edit(id){const x=node(id);if(!x)return;editingRevision=A.state.catalogRevision;A.$('#category-edit-id').value=x.id;A.$('#category-parent').value=x.parentId||'';
+ function edit(id){const x=node(id);if(!x)return;editingRevision=A.state.catalogRevision;setIcon(x.icon);A.$('#category-edit-id').value=x.id;A.$('#category-parent').value=x.parentId||'';
    for(const lang of ['ru','tj','uz']){A.$('#category-name-'+lang).value=x.name?.[lang]||'';A.$('#category-desc-'+lang).value=x.description?.[lang]||'';}
    A.$('#category-status').value=availability.mode(x)||'active';A.$('#category-form-title').textContent='Редактировать раздел';A.$('#category-save').textContent='Сохранить изменения';A.$('#category-form').scrollIntoView({behavior:'smooth',block:'start'});
  }
- function clear(){editingRevision=undefined;A.$('#category-form').reset();A.$('#category-edit-id').value='';A.$('#category-form-title').textContent='Добавить раздел';A.$('#category-save').textContent='Добавить раздел';}
+ function clear(){editingRevision=undefined;A.$('#category-form').reset();setIcon(FFIcons.defaultId);A.$('#category-edit-id').value='';A.$('#category-form-title').textContent='Добавить раздел';A.$('#category-save').textContent='Добавить раздел';}
  function render(){const holder=A.$('#categories-list');if(!holder)return;
    A.$('#category-parent').innerHTML='<option value="">Главная категория</option>'+listOptions().map(([id,n])=>`<option value="${A.escape(id)}">${A.escape(n)}</option>`).join('');
    A.$('#catalog-init-note').hidden=Boolean(A.state.catalog);
@@ -36,7 +38,7 @@
      const inherited=Boolean(access.blockedBy&&access.blockedBy!==x.id);
      const badge=restricted?`<span class="category-state-badge">${access.mode==='hidden'?(inherited?'Скрыта родителем':'Скрыта'):(inherited?'Закрыта родителем':access.mode==='soon'?'Вход закрыт':'Закрыта')}</span>`:'';
      const actions=[['active','Открыть'],['hidden','Скрыть'],['maintenance','Закрыть']].filter(([value])=>value!==mode).map(([value,text])=>`<button type="button" class="small-button" data-category-access="${A.escape(x.id)}" data-access-mode="${value}">${text}</button>`).join('');
-     return `<div class="catalog-item${restricted?' is-restricted':''}" style="gap:12px;padding-left:${Math.min(x._depth,6)*16}px"><div class="number-icon">${x.parentId?'↳':'▦'}</div><div><strong class="catalog-title">${A.escape(breadcrumb(x.id))}${badge}</strong><small>${A.escape(x.description?.ru||'Без описания')} · ${status}</small></div><div class="category-actions"><button type="button" class="small-button" data-category-edit="${A.escape(x.id)}">Изменить</button><button type="button" class="small-button" data-category-delete="${A.escape(x.id)}">Удалить</button>${actions}<button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="-1" aria-label="Выше">↑</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="1" aria-label="Ниже">↓</button></div></div>`;}).join('');
+     return `<div class="catalog-item${restricted?' is-restricted':''}" style="gap:12px;padding-left:${Math.min(x._depth,6)*16}px"><div class="number-icon">${FFIcons.render(x.icon)}</div><div><strong class="catalog-title">${A.escape(breadcrumb(x.id))}${badge}</strong><small>${A.escape(x.description?.ru||'Без описания')} · ${status}</small></div><div class="category-actions"><button type="button" class="small-button" data-category-edit="${A.escape(x.id)}">Изменить</button><button type="button" class="small-button" data-category-delete="${A.escape(x.id)}">Удалить</button>${actions}<button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="-1" aria-label="Выше">↑</button><button type="button" class="small-button" data-category-shift="${A.escape(x.id)}" data-step="1" aria-label="Ниже">↓</button></div></div>`;}).join('');
    A.modules.videos?.refreshCategoryOptions?.();
  }
  const normalize=(all,parentId)=>{const rows=all.filter(x=>(x.parentId||null)===(parentId||null)).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||a.id.localeCompare(b.id));rows.forEach((x,i)=>{x.order=i+1;});};
@@ -50,7 +52,7 @@
    const fresh=items().map(x=>structuredClone(x));const key=id||'section_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
    if(!existing&&fresh.some(x=>x.id===key)){A.notify('Раздел уже существует','error');return;}
    const moved=Boolean(existing&&existing.parentId!==parent);
-   const next=availability.apply({...existing,id:key,parentId:parent,name,description,order:moved||!existing?Math.max(0,...fresh.filter(x=>(x.parentId||null)===parent&&x.id!==key).map(x=>Number(x.order)||0))+1:existing.order},A.$('#category-status').value);
+   const next=availability.apply({...existing,id:key,parentId:parent,name,description,icon:A.$('#category-icon').value||FFIcons.defaultId,order:moved||!existing?Math.max(0,...fresh.filter(x=>(x.parentId||null)===parent&&x.id!==key).map(x=>Number(x.order)||0))+1:existing.order},A.$('#category-status').value);
    const index=fresh.findIndex(x=>x.id===key);if(index>=0)fresh[index]=next;else fresh.push(next);
 
    try{A.dataGuard.catalog(fresh);}catch(err){A.notify(err.message,'error');return;}
@@ -87,7 +89,7 @@
    }catch(err){A.notify('Не удалось удалить категорию: '+err.message,'error');try{await A.refreshAll();}catch{/* Existing load error blocks further mutations. */}}
    finally{A.state.busy=false;}
  }
- function init(){A.$on(A.$('#category-form'),'submit',save);A.$on(A.$('#category-new'),'click',clear);
+ function init(){iconPicker=new IconPicker({onApply:setIcon});setIcon(FFIcons.defaultId);A.$on(A.$('#category-icon-choose'),'click',()=>iconPicker.open(A.$('#category-icon').value));A.$on(A.$('#category-form'),'submit',save);A.$on(A.$('#category-new'),'click',clear);
    A.$on(A.$('#catalog-init'),'click',async()=>{if(A.state.busy)return;A.state.busy=true;A.$('#catalog-init').disabled=true;try{await ensure();A.notify('Структура категорий опубликована');}catch(e){A.notify('Не удалось опубликовать структуру. Проверь правила Firestore: '+e.message,'error');}finally{A.state.busy=false;A.$('#catalog-init').disabled=false;}});
    A.$on(A.$('#categories-list'),'click',e=>{const b=e.target.closest('[data-category-edit],[data-category-shift],[data-category-delete],[data-category-access]');if(!b||A.state.busy)return;if(b.dataset.categoryAccess)changeAccess(b.dataset.categoryAccess,b.dataset.accessMode);else if(b.dataset.categoryDelete)remove(b.dataset.categoryDelete);else if(b.dataset.categoryEdit)edit(b.dataset.categoryEdit);else if(b.dataset.categoryShift)shift(b.dataset.categoryShift,Number(b.dataset.step));});
  }

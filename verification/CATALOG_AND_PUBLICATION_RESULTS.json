@@ -74,6 +74,14 @@
       "result": "PASS"
     },
     {
+      "name": "Category icon create/read/edit persists with real SDK and preserves all translations and lesson bindings",
+      "result": "PASS"
+    },
+    {
+      "name": "Concurrent icon edit rejects stale save and populated category can change only its icon safely",
+      "result": "PASS"
+    },
+    {
       "name": "First publication timestamp survives unpublish, republish and manual order",
       "result": "PASS"
     },

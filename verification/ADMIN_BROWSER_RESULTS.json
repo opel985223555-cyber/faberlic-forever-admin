@@ -210,6 +210,26 @@
       "result": "PASS"
     },
     {
+      "name": "Icon registry contains 72 new choices, six distinct real brands and eight legacy icons",
+      "result": "PASS"
+    },
+    {
+      "name": "Create Instagram category through picker, save, reload and edit its icon to Telegram",
+      "result": "PASS"
+    },
+    {
+      "name": "Picker cancel/Escape and empty search do not change stored or form icon",
+      "result": "PASS"
+    },
+    {
+      "name": "Legacy category without icon and unknown icon identifiers render safe default SVG",
+      "result": "PASS"
+    },
+    {
+      "name": "Desktop picker has six columns; phone picker searches/selects and fits 390/320 pixel screens",
+      "result": "PASS"
+    },
+    {
       "name": "Phone navigation, forms, code actions and centered dialog fit 390 and 320 pixel widths",
       "result": "PASS"
     },
