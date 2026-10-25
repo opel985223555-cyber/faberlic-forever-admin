@@ -192,6 +192,14 @@ async function check(name,fn){try{await fn();results.push({name,result:'PASS'});
   a.once('dialog',d=>d.accept());await a.locator('#universal-create').click();await a.waitForFunction(old=>window.FFAdmin&&document.querySelector('#universal-code').textContent!==old,await a.locator('#universal-code').textContent());
   assert.equal(docs.get('promoCodes/'+old).enabled,false);assert.notEqual(docs.get('accessConfig/universal').codeHash,old);
  });
+ await check('Admin can cancel or reset an installation without resetting its consumed code',async()=>{
+  const item=[...docs.entries()].find(([key,value])=>key.startsWith('promoCodes/')&&value.kind==='single');const hash=item[0].split('/')[1];put(item[0],{...item[1],state:'used'});put('installations/resetDevice',{codeHash:hash,platform:'android',enabled:true});put('promoClaims/'+hash,{uid:'resetDevice'});
+  await a.locator('#promo-refresh').click();await a.waitForSelector('[data-install-reset="resetDevice"]');a.once('dialog',d=>d.dismiss());await a.locator('[data-install-reset="resetDevice"]').click();assert(docs.has('installations/resetDevice'));
+  a.once('dialog',d=>d.accept());await a.locator('[data-install-reset="resetDevice"]').click();await a.waitForFunction(()=>!document.querySelector('[data-install-reset="resetDevice"]'));assert(!docs.has('installations/resetDevice'));assert(!docs.has('promoClaims/'+hash));assert.equal(docs.get(item[0]).state,'used');
+ });
+ await check('Reset of a universal installation preserves other installations and current universal code',async()=>{
+  const hash=docs.get('accessConfig/universal').codeHash;put('installations/universalReset',{codeHash:hash,platform:'ios',enabled:true});put('installations/universalKeep',{codeHash:hash,platform:'android',enabled:true});await a.evaluate(()=>FFAdmin.promoRepo.resetInstallation('universalReset'));assert(!docs.has('installations/universalReset'));assert(docs.has('installations/universalKeep'));assert.equal(docs.get('promoCodes/'+hash).enabled,true);assert.equal(docs.get('accessConfig/universal').codeHash,hash);
+ });
  await check('Interrupted generation resumes the same code batch without duplicates',async()=>{
   const before=[...docs.keys()].filter(x=>x.startsWith('promoCodes/')).length;await a.locator('#promo-amount').fill('250');controls.afterCommit=true;a.once('dialog',d=>d.accept());await a.locator('#promo-generate').click();await a.waitForFunction(()=>document.querySelector('#toast').textContent.includes('При сбое генерации'));
   assert.equal([...docs.keys()].filter(x=>x.startsWith('promoCodes/')).length,before+200);assert.equal(await a.evaluate(()=>FFAdmin.promoRepo.pendingCount()),250);

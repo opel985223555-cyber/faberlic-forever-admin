@@ -166,6 +166,14 @@
       "result": "PASS"
     },
     {
+      "name": "Admin can cancel or reset an installation without resetting its consumed code",
+      "result": "PASS"
+    },
+    {
+      "name": "Reset of a universal installation preserves other installations and current universal code",
+      "result": "PASS"
+    },
+    {
       "name": "Interrupted generation resumes the same code batch without duplicates",
       "result": "PASS"
     },

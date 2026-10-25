@@ -22,6 +22,9 @@
   async universal(){const {store,db}=api(),code=FFInvite.generate(),id=await FFInvite.hash(code),ref=store.doc(db,'accessConfig','universal');
    await store.runTransaction(db,async tx=>{const snap=await tx.get(ref),old=snap.exists()?snap.data().codeHash:null;if(old)tx.update(store.doc(db,'promoCodes',old),{enabled:false,updatedAt:store.serverTimestamp()});tx.set(store.doc(db,'promoCodes',id),{kind:'universal',state:'free',enabled:true,usedAt:null,createdAt:store.serverTimestamp(),updatedAt:store.serverTimestamp()});tx.set(store.doc(db,'promoSecrets',id),{code,createdAt:store.serverTimestamp()});tx.set(ref,{codeHash:id,enabled:true,updatedAt:store.serverTimestamp()});});return code;
   },
+  async resetInstallation(uid){const {store,db}=api(),ref=store.doc(db,'installations',uid);
+   await store.runTransaction(db,async tx=>{const snap=await tx.get(ref);if(!snap.exists())throw Error('Активация уже сброшена. Обновите список.');const hash=snap.data().codeHash,claimRef=store.doc(db,'promoClaims',hash),claim=await tx.get(claimRef);if(claim.exists()&&claim.data().uid===uid)tx.delete(claimRef);tx.delete(ref);});
+  },
   async toggleCode(id,enabled){const {store,db}=api();await store.updateDoc(store.doc(db,'promoCodes',id),{enabled,updatedAt:store.serverTimestamp()});},
   async toggleInstallation(uid,enabled){const {store,db}=api();await store.updateDoc(store.doc(db,'installations',uid),{enabled,updatedAt:store.serverTimestamp()});}
  };

@@ -62,6 +62,14 @@
       "result": "PASS"
     },
     {
+      "name": "Admin reset revokes installation, preserves consumed code and permits a new code on same uid",
+      "result": "PASS"
+    },
+    {
+      "name": "Reset universal installation preserves other devices and supports new activation",
+      "result": "PASS"
+    },
+    {
       "name": "Code state cannot be reset or plaintext secrets read by activated client",
       "result": "PASS"
     }
