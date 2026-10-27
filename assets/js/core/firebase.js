@@ -34,7 +34,8 @@
   if(v.groupId!==undefined&&v.groupId!==null&&typeof v.groupId!=='string')fail('Некорректная группа урока '+v.id);
   if(v.topicId!==undefined&&v.topicId!==null&&typeof v.topicId!=='string'&&!Number.isSafeInteger(v.topicId))fail('Некорректная тема урока '+v.id);
   if(v.description!==undefined&&typeof v.description!=='string')fail('Некорректное описание урока '+v.id);
-  if(v.orientation!==undefined&&!['vertical','horizontal'].includes(v.orientation))fail('Некорректный формат урока '+v.id);
+  if(v.aspectRatio!==undefined&&v.aspectRatio!==null&&(typeof v.aspectRatio!=='number'||!Number.isFinite(v.aspectRatio)||v.aspectRatio<.1||v.aspectRatio>10))fail('Некорректное соотношение сторон '+v.id);
+  if(v.orientation!==undefined&&!['auto','portrait','landscape','square','vertical','horizontal'].includes(v.orientation))fail('Некорректный формат урока '+v.id);
   if(v.order!==undefined&&!orderValue(v.order))fail('Некорректный порядок урока '+v.id);
   revision(v.revision);if(v.orderRevision!==undefined)revision(v.orderRevision);
   if(v.orderScopeId!==undefined&&v.orderScopeId!==scopeId(v))fail('Некорректная область порядка урока '+v.id);
@@ -199,6 +200,7 @@
     else if(existing?.status==='published'&&typeof existing.createdAt?.toMillis==='function')publication.publishedAt=existing.createdAt;
     else if(data.status==='published')publication.publishedAt=timestamp();
     const patch={...data,...publication,order,revision:revision(existing?.revision)+1,orderScopeId:targetScope,orderRevision:revisions[targetScope]+1,updatedAt:timestamp()};
+    if(existing&&existing.youtubeId!==data.youtubeId&&existing.aspectRatio!==undefined&&data.aspectRatio===undefined)patch.aspectRatio=null;
     writeGuard(tx,guard,lessonCounts(guard,cat,existing,data),'lesson',targetId);
     for(const s of affected)bump(tx,s,s===targetScope?data:old,revisions[s]);
     if(id)tx.update(ref,patch);else tx.set(ref,{...patch,clientRequestId:pending.token,createdAt:timestamp()});

@@ -31,7 +31,7 @@
       "result": "PASS"
     },
     {
-      "name": "Android release AAB exists, ZIP CRC valid, unsigned",
+      "name": "Android release AAB exists and ZIP CRC valid; signing checks are recorded separately",
       "result": "PASS"
     }
   ]

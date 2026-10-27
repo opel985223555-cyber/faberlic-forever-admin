@@ -1,0 +1,29 @@
+{
+  "environment": "Pure format contract and existing YouTube URL parser; no remote playback",
+  "results": [
+    {
+      "name": "Manual portrait/landscape/square and legacy vertical/horizontal aliases resolve correctly",
+      "result": "PASS"
+    },
+    {
+      "name": "Duration and Shorts URL never decide video orientation",
+      "result": "PASS"
+    },
+    {
+      "name": "Auto uses valid saved source aspect ratio, explicit mode overrides it",
+      "result": "PASS"
+    },
+    {
+      "name": "Missing and invalid metadata use a safe fallback without pretending to detect dimensions",
+      "result": "PASS"
+    },
+    {
+      "name": "watch, youtu.be and Shorts retain validated embed ID compatibility",
+      "result": "PASS"
+    },
+    {
+      "name": "RU/TJ/UZ format labels and identical shared contract are provided",
+      "result": "PASS"
+    }
+  ]
+}

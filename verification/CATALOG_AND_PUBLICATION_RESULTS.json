@@ -82,6 +82,18 @@
       "result": "PASS"
     },
     {
+      "name": "All current/legacy video formats and saved 4:3 aspect survive real SDK reads without order/date loss",
+      "result": "PASS"
+    },
+    {
+      "name": "Changing YouTube ID clears stale source ratio, while ordinary format edits preserve it",
+      "result": "PASS"
+    },
+    {
+      "name": "Rules reject invalid orientation and aspect ratio even when client format validation is bypassed",
+      "result": "PASS"
+    },
+    {
       "name": "First publication timestamp survives unpublish, republish and manual order",
       "result": "PASS"
     },

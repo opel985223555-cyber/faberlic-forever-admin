@@ -147,7 +147,8 @@ service cloud.firestore {
     && d.order is int && d.order > 0 && d.revision is int && d.revision > 0
     && d.orderRevision is int && d.orderRevision > 0
     && (!('description' in d) || (d.description is string && d.description.size() <= 1200))
-    && (!('orientation' in d) || d.orientation in ['vertical','horizontal'])
+    && (!('orientation' in d) || d.orientation in ['auto','portrait','landscape','square','vertical','horizontal'])
+    && (!('aspectRatio' in d) || d.aspectRatio == null || (d.aspectRatio is number && d.aspectRatio >= 0.1 && d.aspectRatio <= 10))
     && (!('youtubeUrl' in d) || d.youtubeUrl is string)
     && d.orderScopeId == scopeId(d) && d.updatedAt == request.time;
   }

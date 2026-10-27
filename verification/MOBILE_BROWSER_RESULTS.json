@@ -73,6 +73,26 @@
     },
     {
       "platform": "android",
+      "name": "Shorts and long ordinary videos use saved orientation, plus square/auto/other-ratio fallback",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Fullscreen fits each ratio, survives resize without iframe reload, and Back/Escape restore lesson",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Updating only a playing lesson format resizes the same iframe without changing history or favorites",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Native DOM fullscreen exit event restores the lesson when supported; CSS fallback remains available",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
       "name": "No page exceptions and no horizontal overflow",
       "result": "PASS"
     },
@@ -144,6 +164,26 @@
     {
       "platform": "ios",
       "name": "Root and nested category icons use the shared registry in all languages with safe legacy fallback",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Shorts and long ordinary videos use saved orientation, plus square/auto/other-ratio fallback",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Fullscreen fits each ratio, survives resize without iframe reload, and Back/Escape restore lesson",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Updating only a playing lesson format resizes the same iframe without changing history or favorites",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Native DOM fullscreen exit event restores the lesson when supported; CSS fallback remains available",
       "result": "PASS"
     },
     {

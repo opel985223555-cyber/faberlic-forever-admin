@@ -230,6 +230,14 @@
       "result": "PASS"
     },
     {
+      "name": "Video format defaults to Auto and all four formats persist after save/reload",
+      "result": "PASS"
+    },
+    {
+      "name": "Legacy orientation opens in the editor and manual format change preserves category/order/title",
+      "result": "PASS"
+    },
+    {
       "name": "Phone navigation, forms, code actions and centered dialog fit 390 and 320 pixel widths",
       "result": "PASS"
     },

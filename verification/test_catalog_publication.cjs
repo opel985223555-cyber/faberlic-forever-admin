@@ -12,11 +12,11 @@ const legacy=(id='old',lang='ru')=>({categoryId:id,title:'Video',youtubeId:'dQw4
 const payload=id=>({...legacy(id),leafCategoryId:id,description:'',orientation:'vertical'});
 let env,a,b;const results=[];
 const bridge=v=>Array.isArray(v)?Array.from(v,bridge):v&&v.constructor?.name==='Object'?Object.fromEntries(Object.entries(v).map(([k,x])=>[k,bridge(x)])):v;
-function client(store,uid='admin',seed=tree){
+function client(store,uid='admin',seed=tree,skipFormatValidation=false){
  const A={state:{currentUser:{uid}},catalog:{seed:()=>structuredClone(seed)}};
  const sandbox={window:{FFAdmin:A,FF_FIREBASE_CONFIG:{projectId}},TextEncoder,console};vm.createContext(sandbox);
  vm.runInContext(fs.readFileSync(path.join(__dirname,'../assets/js/core/category-availability.js'),'utf8'),sandbox);
- let src=fs.readFileSync(path.join(__dirname,'../assets/js/core/firebase.js'),'utf8').replace(' A.firebase={',' A.testConnect=(store,api)=>{db=store;sdk={db:api};}; A.firebase={');vm.runInContext(src,sandbox);
+ let src=fs.readFileSync(path.join(__dirname,'../assets/js/core/firebase.js'),'utf8').replace(' A.firebase={',' A.testConnect=(store,api)=>{db=store;sdk={db:api};}; A.firebase={');if(skipFormatValidation)src=src.replace(/^.*if\(v\.orientation!==undefined.*$/m,'').replace(/^.*if\(v\.aspectRatio!==undefined.*$/m,'');vm.runInContext(src,sandbox);
  A.testConnect(store,{...web,runTransaction:(db,fn)=>web.runTransaction(db,tx=>fn({get:ref=>tx.get(ref),set:(ref,v,opt)=>opt?tx.set(ref,bridge(v),opt):tx.set(ref,bridge(v)),update:(ref,v)=>tx.update(ref,bridge(v)),delete:ref=>tx.delete(ref)}))});return A;
 }
 async function reset(items=tree,lessons=[]){await env.clearFirestore();await db.doc('admins/admin').set({active:true});await db.doc('taxonomy/catalog').set({items,version:1,revision:1,extra:'keep'});for(let i=0;i<lessons.length;i++)await db.doc('lessons/l'+i).set(lessons[i]);a=client(env.authenticatedContext('admin').firestore(),'admin',items);b=client(env.authenticatedContext('admin').firestore(),'admin',items);}
@@ -68,6 +68,15 @@ await test('Category icon create/read/edit persists with real SDK and preserves 
 });
 await test('Concurrent icon edit rejects stale save and populated category can change only its icon safely',async()=>{
  await reset(tree,[legacy('old')]);await ready();const left=await a.firebase.readSnapshot(),right=await b.firebase.readSnapshot();await save(left.catalog.map(x=>x.id==='old'?{...x,icon:'brand:instagram'}:x),a,left);await assert.rejects(save(right.catalog.map(x=>x.id==='old'?{...x,icon:'lucide:users'}:x),b,right));assert.equal((await db.doc('taxonomy/catalog').get()).data().items.find(x=>x.id==='old').icon,'brand:instagram');assert((await db.doc('lessons/l0').get()).exists);
+});
+await test('All current/legacy video formats and saved 4:3 aspect survive real SDK reads without order/date loss',async()=>{
+ await reset();await ready();for(const orientation of ['auto','portrait','landscape','square','vertical','horizontal']){let state=await a.firebase.readSnapshot();const id=await a.firebase.upsertLesson({...payload('old'),orientation,status:'published'},null,state);let row=(await db.doc('lessons/'+id).get()).data(),order=row.order,first=row.publishedAt.toMillis();state=await a.firebase.readSnapshot();await a.firebase.upsertLesson({...payload('old'),orientation:'auto',aspectRatio:4/3,status:'published'},id,state);row=(await db.doc('lessons/'+id).get()).data();assert.equal(row.aspectRatio,4/3);assert.equal(row.order,order);assert.equal(row.publishedAt.toMillis(),first);assert.equal(row.categoryId,'old');}
+});
+await test('Changing YouTube ID clears stale source ratio, while ordinary format edits preserve it',async()=>{
+ await reset();await ready();let state=await a.firebase.readSnapshot();const id=await a.firebase.upsertLesson({...payload('old'),orientation:'auto',aspectRatio:2.35},null,state);state=await a.firebase.readSnapshot();await a.firebase.upsertLesson({...payload('old'),orientation:'square'},id,state);assert.equal((await db.doc('lessons/'+id).get()).data().aspectRatio,2.35);state=await a.firebase.readSnapshot();await a.firebase.upsertLesson({...payload('old'),orientation:'auto',youtubeId:'M7lc1UVf-VE'},id,state);assert.equal((await db.doc('lessons/'+id).get()).data().aspectRatio,null);
+});
+await test('Rules reject invalid orientation and aspect ratio even when client format validation is bypassed',async()=>{
+ await reset();await ready();const raw=client(env.authenticatedContext('admin').firestore(),'admin',tree,true);for(const value of [{orientation:'sideways'},{orientation:'auto',aspectRatio:0},{orientation:'auto',aspectRatio:'16:9'},{orientation:'auto',aspectRatio:100}]){await assert.rejects(raw.firebase.upsertLesson({...payload('old'),...value},null,await raw.firebase.readSnapshot()));}
 });
 await test('First publication timestamp survives unpublish, republish and manual order',async()=>{
  await reset();await ready();let state=await a.firebase.readSnapshot();const id=await a.firebase.upsertLesson(payload('old'),null,state);let value=(await db.doc('lessons/'+id).get()).data();assert(!value.publishedAt);

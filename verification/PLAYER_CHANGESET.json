@@ -1,0 +1,38 @@
+{
+  "admin": [
+    "assets/js/core/firebase.js",
+    "assets/js/core/video-format.js",
+    "assets/js/modules/videos.js",
+    "firestore.rules",
+    "FIRESTORE_RULES_UPDATED.txt",
+    "index.html",
+    "verification/ADMIN_BROWSER_RESULTS.json",
+    "verification/CATALOG_AND_PUBLICATION_RESULTS.json",
+    "verification/test_admin_browser.cjs",
+    "verification/test_catalog_publication.cjs"
+  ],
+  "android": [
+    "app/build.gradle",
+    "app/src/main/assets/www/core/navigation.js",
+    "app/src/main/assets/www/core/video-format.js",
+    "app/src/main/assets/www/index.html",
+    "app/src/main/assets/www/modules/adaptive-player.css",
+    "app/src/main/assets/www/modules/adaptive-player.js",
+    "app/src/main/assets/www/modules/firebase-lessons.js",
+    "app/src/main/assets/www/modules/lesson.js",
+    "app/src/main/java/tj/faberlic/forever/PublishedLessonsBridge.java",
+    "verification/test_mobile_browser.cjs"
+  ],
+  "ios": [
+    "FaberlicForever/Info.plist",
+    "FaberlicForever/MainViewController.swift",
+    "FaberlicForever/Web/core/navigation.js",
+    "FaberlicForever/Web/core/video-format.js",
+    "FaberlicForever/Web/index.html",
+    "FaberlicForever/Web/modules/adaptive-player.css",
+    "FaberlicForever/Web/modules/adaptive-player.js",
+    "FaberlicForever/Web/modules/firebase-lessons.js",
+    "FaberlicForever/Web/modules/lesson.js",
+    "verification/test_mobile_browser.cjs"
+  ]
+}
