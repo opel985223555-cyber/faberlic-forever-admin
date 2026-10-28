@@ -1,0 +1,14 @@
+{
+  "result": "PASS",
+  "source": "https://disk.yandex.ru/i/tGDOx9e2-8XxWQ",
+  "provider": "yandex_disk",
+  "authentication": "No account, cookies or token",
+  "type": "image/png",
+  "bytes": 1923632,
+  "httpStatus": 200,
+  "downloadContentType": "image/png",
+  "sha256": "6af0071f4eadfe5980f0c32f125990f85e16764e6efdf06d5eb271bade798f92",
+  "signatureVerified": true,
+  "localFixture": "work\\material-fixtures\\user-yandex-file.png",
+  "limitations": "Downloaded on Windows using official REST API. Not a test of native Android/iOS viewer or offline mobile opening."
+}

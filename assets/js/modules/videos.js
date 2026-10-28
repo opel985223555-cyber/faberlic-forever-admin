@@ -2,7 +2,10 @@
 (()=>{
  const A=window.FFAdmin;
  const $=A.$;
- let editingRevision;
+ let editingRevision,manualIcon='';
+ function refreshIcon(){const mode=$('#lesson-icon-mode');if(!mode)return;const v={title:$('#lesson-title').value,description:$('#lesson-description').value,leafCategoryId:$('#lesson-category').value,iconMode:mode.value,iconId:manualIcon};$('#lesson-icon-preview').innerHTML=FFIcons.render(FFLessonIcons.resolve(v,A.state.catalog||A.catalog.seed()).id);}
+ function chooseIcon(){const picker=new IconPicker({onApply:id=>{manualIcon=id;$('#lesson-icon-mode').value='manual';refreshIcon();}});picker.dialog.querySelector('h2').textContent='Иконка урока';picker.dialog.addEventListener('close',()=>picker.destroy(),{once:true});picker.open(manualIcon||FFLessonIcons.resolve({title:$('#lesson-title').value}).id);}
+
  const getVideo=id=>A.state.lessons.find(v=>v.id===id);
  const leaf=v=>v.leafCategoryId||((v.topicId&&['social','ranks'].includes(v.categoryId))?v.categoryId+'__'+v.topicId:v.categoryId)||'newbie';
  const scope=v=>leaf(v)+'|'+(v.language||'ru');
@@ -13,8 +16,8 @@
   const f=$('#filter-category'),v=f?.value||'all';if(f){f.innerHTML='<option value="all">Все разделы</option>'+A.catalog.selectHTML(v);f.value=[...f.options].some(o=>o.value===v)?v:'all';}
   $('#topic-row').hidden=true;
  }
- function clearForm(){editingRevision=undefined;A.state.editingId=null;$('#lesson-form').reset();refreshCategoryOptions();$('#form-heading').textContent='Новый видеоурок';$('#save-lesson').textContent='Сохранить урок';$('#cancel-edit').hidden=true;$('#lesson-status').value='published';$('#lesson-orientation').value='auto';$('#lesson-lang').value='ru';updateCoverPreview();}
- function edit(id){const v=getVideo(id);if(!v)return;editingRevision=A.dataGuard.revision(v.revision);A.navigate('videos');A.state.editingId=v.id;$('#lesson-title').value=v.title||'';$('#lesson-url').value=v.youtubeUrl||A.youtubeLink(v.youtubeId||'');refreshCategoryOptions();$('#lesson-category').value=leaf(v);$('#lesson-description').value=v.description||'';$('#lesson-lang').value=v.language||'ru';$('#lesson-orientation').value=FFVideoFormat.mode(v.orientation);$('#lesson-status').value=v.status||'draft';updateCoverPreview();$('#form-heading').textContent='Редактирование урока';$('#save-lesson').textContent='Сохранить изменения';$('#cancel-edit').hidden=false;$('#form-card').scrollIntoView({behavior:'smooth',block:'start'});}
+ function clearForm(){editingRevision=undefined;A.state.editingId=null;$('#lesson-form').reset();refreshCategoryOptions();$('#form-heading').textContent='Новый видеоурок';$('#save-lesson').textContent='Сохранить урок';$('#cancel-edit').hidden=true;$('#lesson-status').value='published';$('#lesson-orientation').value='auto';$('#lesson-lang').value='ru';manualIcon='';$('#lesson-icon-mode').value='auto';refreshIcon();updateCoverPreview();}
+ function edit(id){const v=getVideo(id);if(!v)return;editingRevision=A.dataGuard.revision(v.revision);A.navigate('videos');A.state.editingId=v.id;$('#lesson-title').value=v.title||'';$('#lesson-url').value=v.youtubeUrl||A.youtubeLink(v.youtubeId||'');refreshCategoryOptions();$('#lesson-category').value=leaf(v);$('#lesson-description').value=v.description||'';$('#lesson-lang').value=v.language||'ru';$('#lesson-orientation').value=FFVideoFormat.mode(v.orientation);$('#lesson-status').value=v.status||'draft';manualIcon=v.iconId||'';$('#lesson-icon-mode').value=v.iconMode||'auto';refreshIcon();updateCoverPreview();$('#form-heading').textContent='Редактирование урока';$('#save-lesson').textContent='Сохранить изменения';$('#cancel-edit').hidden=false;$('#form-card').scrollIntoView({behavior:'smooth',block:'start'});}
  function categoryPath(id){const x=A.catalog.node(id);if(!x)return {root:id,first:null};let first=null,cur=x,root=x,steps=0;while(cur?.parentId&&steps++<20){first=cur;root=A.catalog.node(cur.parentId);if(!root)break;cur=root;}return {root:root?.id||id,first:first?.id||null};}
  async function save(e){e.preventDefault();if(A.state.busy)return;const title=$('#lesson-title').value.trim(),youtubeId=A.youtubeId($('#lesson-url').value),selected=$('#lesson-category').value,language=$('#lesson-lang').value;const id=A.state.editingId,old=id?getVideo(id):null;
   if(!title){A.notify('Введите название урока','error');return;}if(!youtubeId){A.notify('Укажите корректную ссылку YouTube','error');return;}
@@ -26,6 +29,7 @@
   const siblings=A.state.lessons.filter(v=>v.id!==id&&scope(v)===targetScope);const max=Math.max(0,...siblings.map(v=>Number(v.order)||0));
   const order=old&&oldScope===targetScope?(Number(old.order)||1):max+1;
   const payload={title,youtubeUrl:A.youtubeLink(youtubeId),youtubeId,categoryId:path.root,leafCategoryId:selected,groupId,topicId,description:$('#lesson-description').value.trim(),language,orientation:$('#lesson-orientation').value,status:$('#lesson-status').value,order};
+  payload.iconMode=$('#lesson-icon-mode').value;payload.iconId=FFLessonIcons.resolve({...payload,iconId:manualIcon},A.state.catalog||A.catalog.seed()).id;
   A.state.busy=true;$('#save-lesson').disabled=true;
   try{await A.repo.save(payload,id,editingRevision);clearForm();try{await A.refreshAll();A.notify('Урок сохранён. Порядок выставлен автоматически.');}catch(err){A.notify('Урок сохранён, но список не обновлён. Не сохраняйте его повторно; обновите страницу: '+err.message,'error');}}
   catch(err){A.notify('Ошибка сохранения: '+err.message,'error');}
@@ -45,6 +49,7 @@
   $('#lesson-count').textContent=`${lessons.length} из ${A.state.lessons.length}`;host.innerHTML=lessons.length?lessons.map(card).join(''):'<div class="empty-state"><strong>В этом разделе пока нет уроков</strong><p>Добавь первую ссылку YouTube через форму выше.</p></div>';
  }
  function init(){refreshCategoryOptions();clearForm();
+  for(const id of ['lesson-title','lesson-description','lesson-category','lesson-icon-mode'])A.$on($('#'+id),'input',refreshIcon);A.$on($('#lesson-icon-choose'),'click',chooseIcon);
   A.$on($('#lesson-form'),'submit',save);A.$on($('#cancel-edit'),'click',clearForm);
   A.$on($('#lesson-url'),'input',e=>{const id=A.youtubeId(e.target.value);$('#youtube-hint').textContent=id?'✓ YouTube-ссылка распознана':'Поддерживаются YouTube, Shorts и youtu.be';updateCoverPreview()});
   for(const id of ['filter-category','filter-lang','filter-search','filter-status'])A.$on($('#'+id),'change',render);

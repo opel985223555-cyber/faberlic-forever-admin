@@ -147,6 +147,8 @@ service cloud.firestore {
     && d.order is int && d.order > 0 && d.revision is int && d.revision > 0
     && d.orderRevision is int && d.orderRevision > 0
     && (!('description' in d) || (d.description is string && d.description.size() <= 1200))
+    && (!('iconMode' in d) || d.iconMode in ['auto','manual'])
+    && (!('iconId' in d) || (d.iconId is string && d.iconId.size() <= 80 && d.iconId.matches('^[a-zA-Z0-9:_-]+$')))
     && (!('orientation' in d) || d.orientation in ['auto','portrait','landscape','square','vertical','horizontal'])
     && (!('aspectRatio' in d) || d.aspectRatio == null || (d.aspectRatio is number && d.aspectRatio >= 0.1 && d.aspectRatio <= 10))
     && (!('youtubeUrl' in d) || d.youtubeUrl is string)
@@ -269,15 +271,75 @@ service cloud.firestore {
       && request.resource.data.createdAt == resource.data.createdAt;
    allow delete: if isAdmin();
   }
+  function materialV2(d) { return d.get('schemaVersion',0) == 2; }
+  function textMap(m,limit,required) {
+   return m is map && m.keys().hasOnly(['ru','tj','uz']) && m.keys().hasAll(['ru','tj','uz'])
+    && m.ru is string && m.tj is string && m.uz is string
+    && m.ru.size() <= limit && m.tj.size() <= limit && m.uz.size() <= limit
+    && (!required || m.ru.size() > 0);
+  }
+  function sourceURL(url) {
+   return url is string && url.size() <= 2000 &&
+    (url.matches('^https://drive[.]google[.]com/file/d/[A-Za-z0-9_-]+(/view|/preview)?/?([?][^ ]*)?$')
+     || url.matches('^https://drive[.]google[.]com/open[?][^ ]*id=[A-Za-z0-9_-]+[^ ]*$')
+     || url.matches('^https://(disk[.]yandex[.](ru|com)|disk[.]360[.]yandex[.]ru|yadi[.]sk)/(d|i)/[A-Za-z0-9_-]+/?([?][^ ]*)?$'));
+  }
+  function validMaterial2(d) {
+   return d.keys().hasOnly(['schemaVersion','title','description','titleTranslations','descriptionTranslations','url','sourceUrl','provider','previewUrl','categoryId','country','fileType','order','status','language','type','verifiedMime','verifiedName','verifiedSize','revision','createdAt','updatedAt'])
+    && d.schemaVersion == 2 && textMap(d.titleTranslations,160,true) && textMap(d.descriptionTranslations,1200,false)
+    && d.title == d.titleTranslations.ru && d.description == d.descriptionTranslations.ru
+    && d.language == 'ru' && d.type == 'link' && d.url == d.sourceUrl && sourceURL(d.sourceUrl)
+    && d.provider in ['google_drive','yandex_disk'] && (d.previewUrl == '' || sourceURL(d.previewUrl))
+    && validId(d.categoryId) && d.country in ['all','tj','ru','uz']
+    && d.fileType in ['pdf','jpg','png','ppt','pptx','doc','docx'] && d.order is number && d.order >= -1000000000 && d.order <= 1000000000
+    && d.status in ['draft','published'] && d.verifiedMime is string && d.verifiedName is string && d.verifiedName.size() <= 180
+    && d.verifiedSize is int && d.verifiedSize >= 0 && d.verifiedSize <= 104857600
+    && (d.status != 'published' || (d.verifiedSize > 0 && d.verifiedMime.size() > 0))
+    && d.revision is int && d.revision > 0 && d.createdAt is timestamp && d.updatedAt == request.time;
+  }
+  function materialMember(d,categoryId) { return materialV2(d) && d.categoryId == categoryId; }
+  function categoryAdvanced(id,materialId,delta) {
+   let p = /databases/$(database)/documents/materialCategories/$(id);
+   return exists(p) && existsAfter(p) && getAfter(p).data.documentCount == get(p).data.documentCount + delta
+    && getAfter(p).data.membershipRevision == get(p).data.membershipRevision + 1 && getAfter(p).data.lastMaterialId == materialId;
+  }
+  function validMaterialCategory(d) {
+   return d.keys().hasOnly(['name','description','icon','status','order','revision','documentCount','membershipRevision','lastMaterialId','createdAt','updatedAt'])
+    && textMap(d.name,160,true) && textMap(d.description,1200,false) && d.icon is string && d.icon.size() <= 80
+    && d.status in ['published','draft','hidden'] && d.order is number && d.order >= -1000000000 && d.order <= 1000000000
+    && d.revision is int && d.revision > 0 && d.documentCount is int && d.documentCount >= 0
+    && d.membershipRevision is int && d.membershipRevision >= 0 && d.lastMaterialId is string
+    && d.createdAt is timestamp && d.updatedAt == request.time;
+  }
+  function membershipChange(id,before,after) {
+   let p = /databases/$(database)/documents/materials/$(after.lastMaterialId);
+   let was = exists(p) && materialMember(get(p).data,id);
+   let now = existsAfter(p) && materialMember(getAfter(p).data,id);
+   return validId(after.lastMaterialId) && was != now && after.membershipRevision == before.membershipRevision + 1
+    && after.documentCount == before.documentCount + (now ? 1 : -1)
+    && after.diff(before).affectedKeys().hasOnly(['documentCount','membershipRevision','lastMaterialId','revision','updatedAt']);
+  }
+  match /materialCategories/{categoryId} {
+   allow get,list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
+   allow create: if isAdmin() && validMaterialCategory(request.resource.data) && request.resource.data.revision == 1
+    && request.resource.data.documentCount == 0 && request.resource.data.membershipRevision == 0 && request.resource.data.lastMaterialId == '' && request.resource.data.createdAt == request.time;
+   allow update: if isAdmin() && validMaterialCategory(request.resource.data) && request.resource.data.revision == resource.data.revision + 1
+    && request.resource.data.createdAt == resource.data.createdAt
+    && ((request.resource.data.documentCount == resource.data.documentCount && request.resource.data.membershipRevision == resource.data.membershipRevision && request.resource.data.lastMaterialId == resource.data.lastMaterialId)
+     || membershipChange(categoryId,resource.data,request.resource.data));
+   allow delete: if isAdmin() && resource.data.documentCount == 0;
+  }
   match /materials/{materialId} {
-   allow get, list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
-   allow create: if isAdmin() && validMaterial(request.resource.data)
-      && request.resource.data.revision == 1
-      && request.resource.data.createdAt == request.time;
-   allow update: if isAdmin() && validMaterial(request.resource.data)
-      && request.resource.data.revision == resource.data.revision + 1
-      && request.resource.data.createdAt == resource.data.createdAt;
-   allow delete: if isAdmin();
+   allow get,list: if isAdmin() || (hasAccess() && resource.data.status == 'published');
+   allow create: if isAdmin() && (validMaterial(request.resource.data) || validMaterial2(request.resource.data))
+    && request.resource.data.revision == 1 && request.resource.data.createdAt == request.time
+    && (!materialV2(request.resource.data) || categoryAdvanced(request.resource.data.categoryId,materialId,1));
+   allow update: if isAdmin() && request.resource.data.revision == resource.data.revision + 1 && request.resource.data.createdAt == resource.data.createdAt
+    && (( !materialV2(resource.data) && !materialV2(request.resource.data) && validMaterial(request.resource.data))
+     || (materialV2(resource.data) && validMaterial2(request.resource.data)
+      && ((request.resource.data.categoryId == resource.data.categoryId && existsAfter(/databases/$(database)/documents/materialCategories/$(resource.data.categoryId)))
+       || (request.resource.data.categoryId != resource.data.categoryId && categoryAdvanced(resource.data.categoryId,materialId,-1) && categoryAdvanced(request.resource.data.categoryId,materialId,1)))));
+   allow delete: if isAdmin() && (!materialV2(resource.data) || categoryAdvanced(resource.data.categoryId,materialId,-1));
   }
   function claimable(hash) {
    let c = get(/databases/$(database)/documents/promoCodes/$(hash)).data;

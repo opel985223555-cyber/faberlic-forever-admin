@@ -238,6 +238,22 @@
       "result": "PASS"
     },
     {
+      "name": "Lesson automatic preview follows title and manual selection remains after editing",
+      "result": "PASS"
+    },
+    {
+      "name": "Materials category form, verified publication and country preserve original URL and translations",
+      "result": "PASS"
+    },
+    {
+      "name": "Materials hide category and reject occupied category deletion without losing document",
+      "result": "PASS"
+    },
+    {
+      "name": "Materials manual category icon applies and legacy editor does not edit schema2 records",
+      "result": "PASS"
+    },
+    {
       "name": "Phone navigation, forms, code actions and centered dialog fit 390 and 320 pixel widths",
       "result": "PASS"
     },

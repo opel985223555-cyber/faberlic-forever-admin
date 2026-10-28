@@ -102,6 +102,10 @@
       "result": "PASS"
     },
     {
+      "name": "Lesson manual and auto icons persist through real SDK transactions; unsafe mode/id rejected by Rules",
+      "result": "PASS"
+    },
+    {
       "name": "Nonadmin writes denied; published reads and live/material contracts preserved",
       "result": "PASS"
     }

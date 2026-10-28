@@ -1,0 +1,12 @@
+/* Revision checks and category membership are one atomic Firestore transaction. */
+(()=>{'use strict';const A=FFAdmin,conflict=()=>{throw Error('Запись изменилась. Обновите список и повторите.');};
+ function context(){const {store:s,db}=A.firebase.services();return {s,db,ref:(c,id)=>s.doc(db,c,id),stamp:()=>s.serverTimestamp()};}
+ function check(snap,expected){if(!snap.exists()||snap.data().revision!==expected)conflict();return snap.data();}
+ A.materialRepo={
+  async list(){const {s,db}=context();const [cats,docs]=await Promise.all([s.getDocsFromServer(s.collection(db,'materialCategories')),s.getDocsFromServer(s.collection(db,'materials'))]);return {categories:cats.docs.map(d=>({...d.data(),id:d.id})),materials:docs.docs.map(d=>({...d.data(),id:d.id})).filter(d=>d.schemaVersion===2)};},
+  async category(payload,old,remove=false){const {s,db,ref,stamp}=context(),r=old?ref('materialCategories',old.id):s.doc(s.collection(db,'materialCategories'));await s.runTransaction(db,async tx=>{const snap=await tx.get(r);if(old){const d=check(snap,old.revision);if(remove){if(d.documentCount!==0)throw Error('В категории есть документы. Сначала перенесите или удалите их отдельно.');tx.delete(r);return;}tx.update(r,{...payload,revision:d.revision+1,updatedAt:stamp()});}else{if(snap.exists())conflict();tx.set(r,{...payload,revision:1,documentCount:0,membershipRevision:0,lastMaterialId:'',createdAt:stamp(),updatedAt:stamp()});}});return r.id;},
+  async save(payload,old,remove=false){const {s,db,ref,stamp}=context(),r=old?ref('materials',old.id):s.doc(s.collection(db,'materials'));await s.runTransaction(db,async tx=>{const snap=await tx.get(r);const previous=old?check(snap,old.revision):null;if(!old&&snap.exists())conflict();const from=previous?.categoryId,to=remove?null:payload.categoryId,ids=[...new Set([from,to].filter(Boolean))],cats=new Map();for(const id of ids){const c=await tx.get(ref('materialCategories',id));if(!c.exists())throw Error('Категория удалена. Обновите список.');cats.set(id,c.data());}
+    if(from!==to)for(const id of ids){const c=cats.get(id),delta=(id===to?1:0)-(id===from?1:0);if(c.documentCount+delta<0)throw Error('Повреждён счётчик документов');tx.update(ref('materialCategories',id),{documentCount:c.documentCount+delta,revision:c.revision+1,membershipRevision:c.membershipRevision+1,lastMaterialId:r.id,updatedAt:stamp()});}
+    if(remove)tx.delete(r);else tx.set(r,{...payload,revision:(previous?.revision||0)+1,createdAt:previous?.createdAt||stamp(),updatedAt:stamp()});});return r.id;}
+ };
+})();

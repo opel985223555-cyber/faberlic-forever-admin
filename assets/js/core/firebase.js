@@ -36,6 +36,7 @@
   if(v.description!==undefined&&typeof v.description!=='string')fail('Некорректное описание урока '+v.id);
   if(v.aspectRatio!==undefined&&v.aspectRatio!==null&&(typeof v.aspectRatio!=='number'||!Number.isFinite(v.aspectRatio)||v.aspectRatio<.1||v.aspectRatio>10))fail('Некорректное соотношение сторон '+v.id);
   if(v.orientation!==undefined&&!['auto','portrait','landscape','square','vertical','horizontal'].includes(v.orientation))fail('Некорректный формат урока '+v.id);
+  if(v.iconMode!==undefined&&!['auto','manual'].includes(v.iconMode))fail('Некорректный режим иконки');if(v.iconId!==undefined&&(typeof v.iconId!=='string'||!FFIcons.has(v.iconId)))fail('Неизвестная иконка урока');
   if(v.order!==undefined&&!orderValue(v.order))fail('Некорректный порядок урока '+v.id);
   revision(v.revision);if(v.orderRevision!==undefined)revision(v.orderRevision);
   if(v.orderScopeId!==undefined&&v.orderScopeId!==scopeId(v))fail('Некорректная область порядка урока '+v.id);

@@ -63,6 +63,26 @@
     },
     {
       "platform": "android",
+      "name": "Materials catalog separates countries from language, includes common files, omits empty regions",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Materials use native ID-only bridge, progress, cancellation and retry without external navigation",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Office without PDF offers explicit fallback; hidden category disappears immediately",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
+      "name": "Thematic icon replaces only category lesson miniatures; manual icon survives metadata mapping",
+      "result": "PASS"
+    },
+    {
+      "platform": "android",
       "name": "Revoked state clears private UI and no account deletion controls are exposed",
       "result": "PASS"
     },
@@ -154,6 +174,26 @@
     {
       "platform": "ios",
       "name": "Materials, category back navigation and approved fullscreen control remain",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Materials catalog separates countries from language, includes common files, omits empty regions",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Materials use native ID-only bridge, progress, cancellation and retry without external navigation",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Office without PDF offers explicit fallback; hidden category disappears immediately",
+      "result": "PASS"
+    },
+    {
+      "platform": "ios",
+      "name": "Thematic icon replaces only category lesson miniatures; manual icon survives metadata mapping",
       "result": "PASS"
     },
     {

@@ -1,0 +1,33 @@
+{
+  "environment": "Local unit fixtures; no real cloud files requested",
+  "results": [
+    {
+      "name": "Distinct three lesson themes in same category and RU/TJ/UZ dictionaries",
+      "result": "PASS"
+    },
+    {
+      "name": "Manual icon stays after title edit, auto changes with title, brands have priority",
+      "result": "PASS"
+    },
+    {
+      "name": "Legacy fallback: description, leaf, ancestor, safe default and unknown manual",
+      "result": "PASS"
+    },
+    {
+      "name": "Strict provider allowlist rejects folders, HTTP, credentials, lookalikes and local hosts",
+      "result": "PASS"
+    },
+    {
+      "name": "Google metadata uses official API, checks canDownload and actual MIME, no HTML rewrite",
+      "result": "PASS"
+    },
+    {
+      "name": "Yandex metadata checks type=file; rejects folder, unknown type, zero/oversized file, private and quota",
+      "result": "PASS"
+    },
+    {
+      "name": "Translation fallback is independent from country",
+      "result": "PASS"
+    }
+  ]
+}

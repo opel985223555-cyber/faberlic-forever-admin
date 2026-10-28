@@ -1,0 +1,49 @@
+{
+  "environment": "Local demo Firestore only; repository uses real SDK and actual rules",
+  "results": [
+    {
+      "name": "Create translated category and empty delete",
+      "result": "PASS"
+    },
+    {
+      "name": "Publish document and atomically increment membership",
+      "result": "PASS"
+    },
+    {
+      "name": "Nonempty deletion denied by repository and Rules",
+      "result": "PASS"
+    },
+    {
+      "name": "Move document updates both counts and preserves metadata",
+      "result": "PASS"
+    },
+    {
+      "name": "Stale metadata save and repeated deletion conflict",
+      "result": "PASS"
+    },
+    {
+      "name": "Concurrent add versus category delete leaves no orphan or missing count",
+      "result": "PASS"
+    },
+    {
+      "name": "Direct orphan create, bare delete and counter reset denied",
+      "result": "PASS"
+    },
+    {
+      "name": "Status edit keeps counts, anonymous reads and client writes denied",
+      "result": "PASS"
+    },
+    {
+      "name": "Published queries work for activated client, draft stays private",
+      "result": "PASS"
+    },
+    {
+      "name": "Legacy material can still create, edit and delete without new catalog",
+      "result": "PASS"
+    },
+    {
+      "name": "V2 cannot downgrade into legacy schema to escape membership protection",
+      "result": "PASS"
+    }
+  ]
+}
