@@ -28,7 +28,11 @@
   return items;
  }
  function lesson(v,write=false){
-  if(!object(v)||!key(v.id)||typeof v.title!=='string'||!v.title.trim()||typeof v.youtubeId!=='string'||!/^[-\w]{11}$/.test(v.youtubeId)||!key(v.categoryId)||!key(leaf(v)))fail('Некорректный урок '+(v?.id||''));
+  if(!object(v)||!key(v.id)||typeof v.title!=='string'||!v.title.trim()||!key(v.categoryId)||!key(leaf(v)))fail('Некорректный урок '+(v?.id||''));
+  const provider=v.videoProvider||'youtube';
+  if(provider==='youtube'){if(typeof v.youtubeId!=='string'||!/^[-\w]{11}$/.test(v.youtubeId)||v.videoUrl!==undefined&&v.videoUrl!=='')fail('Некорректная ссылка YouTube');}
+  else if(provider==='yandex_disk'){if(v.youtubeId!==''||typeof v.videoUrl!=='string'||v.videoUrl.length>2000||!/^https:\/\/(?:disk\.yandex\.(?:ru|com)|disk\.360\.yandex\.ru|yadi\.sk)\/(?:d|i)\/[A-Za-z0-9_-]+\/?$/.test(v.videoUrl))fail('Некорректная публичная ссылка Яндекс Диска');}
+  else fail('Неизвестный источник видео');
   if(!['published','draft'].includes(v.status)||(v.language!==undefined&&!['ru','tj','uz'].includes(v.language)))fail('Некорректный язык или статус урока '+v.id);
   if(v.youtubeUrl!==undefined&&typeof v.youtubeUrl!=='string')fail('Некорректная ссылка урока '+v.id);
   if(v.groupId!==undefined&&v.groupId!==null&&typeof v.groupId!=='string')fail('Некорректная группа урока '+v.id);
@@ -201,7 +205,7 @@
     else if(existing?.status==='published'&&typeof existing.createdAt?.toMillis==='function')publication.publishedAt=existing.createdAt;
     else if(data.status==='published')publication.publishedAt=timestamp();
     const patch={...data,...publication,order,revision:revision(existing?.revision)+1,orderScopeId:targetScope,orderRevision:revisions[targetScope]+1,updatedAt:timestamp()};
-    if(existing&&existing.youtubeId!==data.youtubeId&&existing.aspectRatio!==undefined&&data.aspectRatio===undefined)patch.aspectRatio=null;
+    if(existing&&(existing.youtubeId!==data.youtubeId||(existing.videoProvider||'youtube')!==(data.videoProvider||'youtube')||existing.videoUrl!==data.videoUrl)&&existing.aspectRatio!==undefined&&data.aspectRatio===undefined)patch.aspectRatio=null;
     writeGuard(tx,guard,lessonCounts(guard,cat,existing,data),'lesson',targetId);
     for(const s of affected)bump(tx,s,s===targetScope?data:old,revisions[s]);
     if(id)tx.update(ref,patch);else tx.set(ref,{...patch,clientRequestId:pending.token,createdAt:timestamp()});

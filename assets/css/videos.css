@@ -12,3 +12,4 @@
 /* CMS-07-YT: library ordering; thumbnails come directly from YouTube. */
 .lesson-thumb{object-fit:cover}.lesson-row[draggable="true"]{cursor:grab}.lesson-row.dragover{outline:2px solid var(--lime)}
 @media(max-width:740px){.filters{flex-wrap:wrap}.filters select{min-width:130px}.lesson-row{flex-wrap:wrap}.lesson-actions{width:100%;flex-direction:row;flex-wrap:wrap}.lesson-info{min-width:170px}}
+.lesson-thumb svg{display:block;width:28px;height:28px;margin:20px auto}
